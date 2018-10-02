@@ -8,8 +8,40 @@
     tools:context=".MainActivity">
 
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start within (secs):"
+        />
+
     <EditText
-        android:id="@+id/et_duration"
+        android:id="@+id/et_start_within"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Check every n (secs, min is 15 secs)"
+        />
+
+    <EditText
+        android:id="@+id/et_interval"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Number of checks"
+        />
+
+    <EditText
+        android:id="@+id/et_count"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="number"

@@ -16,7 +16,7 @@ class BeaconScanner : BroadcastReceiver() {
     }
 
     fun ShowLog(message: String) {
-        Log.d(TAG, Date().toString() + message)
+        Log.w(TAG, Date().toString() + message)
     }
 }
 

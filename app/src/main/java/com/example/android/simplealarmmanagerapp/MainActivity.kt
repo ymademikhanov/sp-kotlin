@@ -15,6 +15,7 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.Math.max
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -32,17 +33,26 @@ class MainActivity : AppCompatActivity() {
         alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         btn_create.setOnClickListener {
-            val duration = et_duration.text.toString().toInt() * 1000
-            val intent = Intent(context, BeaconScanner::class.java)
-            val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val start_within = et_start_within.text.toString().toInt() * 1000
+            val interval = max(et_interval.text.toString().toInt(), 15) * 1000
+            var checks_number = max(et_count.text.toString().toInt(), 1)
 
-            ShowLog("Alarm was created for " + duration + " millis.")
+            val offset = System.currentTimeMillis()
+            var start_time = start_within
+            while (checks_number > 0) {
 
-            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + duration, pendingIntent)
+                val intent = Intent(context, BeaconScanner::class.java)
+                val pendingIntent = PendingIntent.getBroadcast(context, checks_number, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                ShowLog("Alarm was created for " + start_time + " millis.")
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP,offset + start_time, pendingIntent)
+
+                start_time += interval
+                checks_number -= 1
+            }
         }
     }
 
     fun ShowLog(message: String) {
-        Log.d(TAG, Date().toString() + message)
+        Log.w(TAG, Date().toString() + message)
     }
 }
