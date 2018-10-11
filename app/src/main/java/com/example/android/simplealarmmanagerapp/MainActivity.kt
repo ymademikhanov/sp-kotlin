@@ -1,22 +1,16 @@
 package com.example.android.simplealarmmanagerapp
 
 import android.app.AlarmManager
-import android.app.Notification
-import android.app.NotificationManager
 import android.app.PendingIntent
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.Math.max
 import java.util.*
+
 
 class MainActivity : AppCompatActivity() {
 
