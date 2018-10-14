@@ -1,14 +1,11 @@
 package com.example.android.simplealarmmanagerapp.form_creators
 
 import android.content.Context
-import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import com.example.android.simplealarmmanagerapp.models.Account
 import com.example.android.simplealarmmanagerapp.models.FormField
 import com.example.android.simplealarmmanagerapp.models.FormFieldType
-import com.example.android.simplealarmmanagerapp.models.Instructor
 
 class LoginFormCreator(var context: Context) {
     var TAG: String = "InstructorFormCreator"
@@ -25,9 +22,6 @@ class LoginFormCreator(var context: Context) {
 
         submitButton = Button(context)
         submitButton.text = "Login"
-        submitButton.setOnClickListener(View.OnClickListener {
-            Log.d(TAG, getAccount().toString())
-        })
 
         layout.addView(emailField.editText)
         layout.addView(passwordField.editText)
@@ -35,7 +29,6 @@ class LoginFormCreator(var context: Context) {
     }
 
     fun getAccount() : Account {
-        var account = Account(emailField.getText().toString(), passwordField.getText().toString())
-        return account
+        return Account(emailField.getText(), passwordField.getText())
     }
 }

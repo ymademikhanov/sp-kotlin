@@ -23,6 +23,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        ShowLog(intent.getStringExtra("JWToken"))
+
         context = this
         alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -32,13 +34,16 @@ class MainActivity : AppCompatActivity() {
             var checks_number = max(et_count.text.toString().toInt(), 1)
 
             val offset = System.currentTimeMillis()
+
+            ShowLog("Offset is " + offset)
+
             var start_time = start_within
             while (checks_number > 0) {
 
                 val intent = Intent(context, BeaconScanner::class.java)
-                val pendingIntent = PendingIntent.getBroadcast(context, checks_number, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingIntent = PendingIntent.getBroadcast(context, Random().nextInt(1000000), intent, PendingIntent.FLAG_ONE_SHOT)
                 ShowLog("Alarm was created for " + start_time + " millis.")
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP,offset + start_time, pendingIntent)
+                alarmManager.setExact(AlarmManager.RTC,offset + start_time, pendingIntent)
 
                 start_time += interval
                 checks_number -= 1

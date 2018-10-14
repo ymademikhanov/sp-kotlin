@@ -55,6 +55,7 @@ class BluetoothService : Service() {
 
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancelAll()
+            stopService(intent)
         }
 
         return super.onStartCommand(intent, flags, startId)
@@ -94,7 +95,7 @@ class BluetoothService : Service() {
                     }
                     createNotification(context, deviceName, deviceHardwareAddress)
 
-                    ShowLog("Found BT device with name: " + deviceName + " and address: " + deviceHardwareAddress)
+//                    ShowLog("Found BT device with name: " + deviceName + " and address: " + deviceHardwareAddress)
 
                     if (deviceName.equals("ymademikhanov")) {
                         ShowLog("CHECKIN IS DONE!")
@@ -104,6 +105,7 @@ class BluetoothService : Service() {
                         }
                         ShowLog("Disabling bluetooth")
                         mBluetoothAdapter.disable()
+
                     }
 
                 }

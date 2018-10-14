@@ -8,6 +8,7 @@ import android.widget.LinearLayout
 import com.example.android.simplealarmmanagerapp.models.FormField
 import com.example.android.simplealarmmanagerapp.models.FormFieldType
 import com.example.android.simplealarmmanagerapp.models.Student
+import khttp.get
 
 class StudentFormCreator(var context: Context) {
     var TAG: String = "InstructorFormCreator"
@@ -29,6 +30,7 @@ class StudentFormCreator(var context: Context) {
 
         submitButton = Button(context)
         submitButton.text = "Register"
+
         submitButton.setOnClickListener(View.OnClickListener {
             Log.d(TAG, getStudent().toString())
         })
