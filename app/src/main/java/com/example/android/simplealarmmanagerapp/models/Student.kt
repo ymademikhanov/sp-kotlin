@@ -5,15 +5,17 @@ class Student : Account {
     var firstname: String = "Anuar"
     var lastname: String = "Otynshin"
 
-    constructor(firstname: String,
+    constructor(studentId: Int,
+                firstname: String,
                 lastname: String,
                 email: String,
                 password: String) : super(email, password) {
+        this.studentId = studentId
         this.firstname = firstname
         this.lastname = lastname
     }
 
     override fun toString(): String {
-        return "{ firstname: " + firstname + "\n lastname: " + lastname  + "\n" + super.toString() + " } "
+        return "{" + "studentId: " + studentId + "\n firstname: " + firstname + "\n lastname: " + lastname  + "\n" + super.toString() + " } "
     }
 }

@@ -7,6 +7,40 @@
     android:padding="20dp"
     tools:context=".MainActivity">
 
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="A target device address:"
+        />
+
+    <EditText
+        android:id="@+id/et_target_device_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/save_target_device_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save this address"
+            android:layout_weight="1"
+            />
+        <Button
+            android:id="@+id/target_beacon_address_btn"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="or select from old inputs"
+            android:layout_weight="1"
+            />
+    </LinearLayout>
+
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -57,20 +91,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Create"/>
-        <Button
-            android:id="@+id/btn_update"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Update"
-            />
-        <Button
-            android:id="@+id/btn_cancel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Cancel"
-            />
     </LinearLayout>
 
 

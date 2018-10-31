@@ -7,15 +7,15 @@ import android.widget.Button
 import android.widget.LinearLayout
 import com.example.android.simplealarmmanagerapp.models.FormField
 import com.example.android.simplealarmmanagerapp.models.FormFieldType
-import com.example.android.simplealarmmanagerapp.models.Instructor
+import com.example.android.simplealarmmanagerapp.models.Student
+import khttp.get
 
-class InstructorFormCreator(var context: Context) {
+class StudentSignUpFormCreator(var context: Context) {
     var TAG: String = "InstructorFormCreator"
     lateinit var layout: LinearLayout
+    lateinit var studentIdField: FormField
     lateinit var firstnameField: FormField
     lateinit var lastnameField: FormField
-    lateinit var officeField: FormField
-    lateinit var phoneField: FormField
     lateinit var emailField: FormField
     lateinit var passwordField: FormField
     lateinit var submitButton: Button
@@ -24,37 +24,35 @@ class InstructorFormCreator(var context: Context) {
         layout = LinearLayout(context)
         layout.orientation = LinearLayout.VERTICAL
 
+        studentIdField = FormField(context, FormFieldType.NUMBER, "Student ID")
         firstnameField = FormField(context, FormFieldType.NAME, "Firstname")
         lastnameField = FormField(context, FormFieldType.NAME, "Lastname")
-        officeField = FormField(context, FormFieldType.TEXT, "Office")
-        phoneField = FormField(context, FormFieldType.TEXT, "Phone")
         emailField = FormField(context, FormFieldType.EMAIL, "Email")
         passwordField = FormField(context, FormFieldType.PASSWORD, "Password")
 
         submitButton = Button(context)
         submitButton.text = "Register"
+
         submitButton.setOnClickListener(View.OnClickListener {
-            Log.d(TAG, getInstructor().toString())
+            Log.d(TAG, getStudent().toString())
         })
 
+        layout.addView(studentIdField.editText)
         layout.addView(firstnameField.editText)
         layout.addView(lastnameField.editText)
-        layout.addView(officeField.editText)
-        layout.addView(phoneField.editText)
         layout.addView(emailField.editText)
         layout.addView(passwordField.editText)
         layout.addView(submitButton)
     }
 
-    fun getInstructor() : Instructor {
-        var instructor = Instructor(
+    fun getStudent() : Student {
+        var student = Student(
+                studentIdField.getText().toInt(),
                 firstnameField.getText(),
                 lastnameField.getText(),
-                officeField.getText(),
-                phoneField.getText(),
                 emailField.getText(),
                 passwordField.getText()
-                )
-        return instructor
+        )
+        return student
     }
 }

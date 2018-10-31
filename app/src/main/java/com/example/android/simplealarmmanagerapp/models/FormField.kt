@@ -6,7 +6,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 
 enum class FormFieldType {
-    EMAIL, PASSWORD, NAME, TEXT
+    EMAIL, PASSWORD, NAME, TEXT, NUMBER
 }
 
 class FormField {
@@ -28,6 +28,9 @@ class FormField {
             }
             FormFieldType.TEXT -> {
                 editText.setInputType(InputType.TYPE_CLASS_TEXT)
+            }
+            FormFieldType.NUMBER -> {
+                editText.setInputType(InputType.TYPE_NUMBER_VARIATION_NORMAL)
             }
         }
 

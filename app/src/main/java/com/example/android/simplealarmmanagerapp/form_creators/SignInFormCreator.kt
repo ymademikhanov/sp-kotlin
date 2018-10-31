@@ -7,7 +7,7 @@ import com.example.android.simplealarmmanagerapp.models.Account
 import com.example.android.simplealarmmanagerapp.models.FormField
 import com.example.android.simplealarmmanagerapp.models.FormFieldType
 
-class LoginFormCreator(var context: Context) {
+class SignInFormCreator(var context: Context) {
     var TAG: String = "InstructorFormCreator"
     lateinit var layout: LinearLayout
     lateinit var emailField: FormField

@@ -7,14 +7,15 @@ import android.widget.Button
 import android.widget.LinearLayout
 import com.example.android.simplealarmmanagerapp.models.FormField
 import com.example.android.simplealarmmanagerapp.models.FormFieldType
-import com.example.android.simplealarmmanagerapp.models.Student
-import khttp.get
+import com.example.android.simplealarmmanagerapp.models.Instructor
 
-class StudentFormCreator(var context: Context) {
+class InstructorSignUpFormCreator(var context: Context) {
     var TAG: String = "InstructorFormCreator"
     lateinit var layout: LinearLayout
     lateinit var firstnameField: FormField
     lateinit var lastnameField: FormField
+    lateinit var officeField: FormField
+    lateinit var phoneField: FormField
     lateinit var emailField: FormField
     lateinit var passwordField: FormField
     lateinit var submitButton: Button
@@ -25,30 +26,35 @@ class StudentFormCreator(var context: Context) {
 
         firstnameField = FormField(context, FormFieldType.NAME, "Firstname")
         lastnameField = FormField(context, FormFieldType.NAME, "Lastname")
+        officeField = FormField(context, FormFieldType.TEXT, "Office")
+        phoneField = FormField(context, FormFieldType.TEXT, "Phone")
         emailField = FormField(context, FormFieldType.EMAIL, "Email")
         passwordField = FormField(context, FormFieldType.PASSWORD, "Password")
 
         submitButton = Button(context)
         submitButton.text = "Register"
-
         submitButton.setOnClickListener(View.OnClickListener {
-            Log.d(TAG, getStudent().toString())
+            Log.d(TAG, getInstructor().toString())
         })
 
         layout.addView(firstnameField.editText)
         layout.addView(lastnameField.editText)
+        layout.addView(officeField.editText)
+        layout.addView(phoneField.editText)
         layout.addView(emailField.editText)
         layout.addView(passwordField.editText)
         layout.addView(submitButton)
     }
 
-    fun getStudent() : Student {
-        var student = Student(
+    fun getInstructor() : Instructor {
+        var instructor = Instructor(
                 firstnameField.getText(),
                 lastnameField.getText(),
+                officeField.getText(),
+                phoneField.getText(),
                 emailField.getText(),
                 passwordField.getText()
-        )
-        return student
+                )
+        return instructor
     }
 }
