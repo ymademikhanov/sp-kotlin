@@ -1,6 +1,8 @@
 package com.example.android.simplealarmmanagerapp
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -19,32 +21,36 @@ import kotlin.collections.ArrayList
 
 class CourseListActivity : AppCompatActivity() {
     val TAG = "CourseListActivity"
-    val COURSES_URL = "https://attendance-app-dev.herokuapp.com/api/v1/courses"
-    var studentId: Int = 0
+    val STUDENT_URL = "https://attendance-app-dev.herokuapp.com/api/v1/students"
+    var SECTION_SUFFIX = "sections"
 
-    var context = this
-    var areCoursesLoaded: Boolean = false
+    val PREFERENCES_NAME = "AuthenticationPreferences"
+    lateinit var preferences: SharedPreferences
 
+    lateinit var context: Context
     lateinit var courseList: ArrayList<String>
-
     lateinit var courseListView : ListView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_course_list)
 
-        courseListView = findViewById(R.id.course_list_view)
-        studentId = intent.getIntExtra("studentId", studentId)
+        context = this
+        preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
 
-        ShowLog("onCreate", studentId.toString())
-        courseList = ArrayList<String>()
+        courseListView = findViewById(R.id.course_list_view)
+        courseList = ArrayList()
+
+        val studentId = preferences.getInt("accountId", 0)
         CourseListLoaderInBackground().execute(studentId)
     }
 
     inner class CourseListLoaderInBackground: AsyncTask<Int, String, JSONArray>() {
         override fun doInBackground(vararg studentIds: Int?): JSONArray {
             val studentId = studentIds[0]
-            return get(COURSES_URL).jsonArray
+            val response = get("$STUDENT_URL/$studentId/$SECTION_SUFFIX")
+            Log.i(TAG, "Response: $response")
+            return response.jsonArray
         }
 
         override fun onPostExecute(courses: JSONArray) {
@@ -55,9 +61,5 @@ class CourseListActivity : AppCompatActivity() {
             var adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, courseList)
             courseListView.adapter = adapter
         }
-    }
-
-    fun ShowLog(subTag: String, message: String) {
-        Log.d(TAG + ":" + subTag, Date().toString() + " : " + message)
     }
 }

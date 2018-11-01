@@ -17,15 +17,10 @@ import com.example.android.simplealarmmanagerapp.form_creators.SignInFormCreator
 import com.example.android.simplealarmmanagerapp.form_creators.StudentSignUpFormCreator
 import com.example.android.simplealarmmanagerapp.models.Account
 import com.example.android.simplealarmmanagerapp.models.Student
-import io.jsonwebtoken.*
-import io.jsonwebtoken.impl.crypto.MacProvider
 import khttp.post
 import khttp.responses.Response
 
 import kotlinx.android.synthetic.main.activity_auth.*
-import mu.KotlinLogging
-import org.json.JSONObject
-import java.util.*
 
 enum class AuthenticationMode {
     SIGNIN, STUDENT_REGISTRATION, INSTRUCTOR_REGISTRATION
@@ -165,28 +160,15 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
         override fun onPostExecute(r: Response) {
             if (r.statusCode == 200 && r.text == "\"\"") {
                 progressDialog.dismiss()
-                Log.i(TAG, "Successful sign-in")
 
-                val navigateToMainPage = Intent(context, CourseListActivity::class.java)
-                val jwtToken = r.headers.get("X-Auth").toString()
+                Log.i(TAG, "Successful sign-in")
 
                 preferences.edit().putBoolean("signedIn", true).apply()
 
-                navigateToMainPage.putExtra("JWToken", jwtToken)
+                val jwtToken = r.headers["X-Auth"].toString()
+                extractAccountTypeAndIDFromJWT(jwtToken)
 
-                val split_string = jwtToken.split(".")
-
-                val base64EncodedBody = split_string[1]
-                val body = android.util.Base64.decode(base64EncodedBody, android.util.Base64.DEFAULT);
-                val bodyStr = String(body)
-
-                val parser = Parser()
-                val stringBuilder = StringBuilder(bodyStr)
-                val json: JsonObject = parser.parse(stringBuilder) as JsonObject
-
-
-                Log.i(TAG, "Name : ${json.string("account_type")}, Age : ${json.int("account_id")}")
-
+                val navigateToMainPage = Intent(context, HomeActivity::class.java)
                 startActivity(navigateToMainPage)
             } else {
                 Log.i(TAG, "Failed account sign in.")
@@ -220,14 +202,36 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
 
                 preferences.edit().putBoolean("signedIn", true).apply()
 
-                val navigateToMainPage = Intent(context, MainActivity::class.java)
-                navigateToMainPage.putExtra("JWToken", r.headers.get("X-Auth").toString())
+                val jwtToken = r.headers["X-Auth"].toString()
+                extractAccountTypeAndIDFromJWT(jwtToken)
+
+                val navigateToMainPage = Intent(context, CourseListActivity::class.java)
                 startActivity(navigateToMainPage)
             } else {
                 Log.i(TAG, "Failed student sign up.")
                 removeUserFromDevice()
             }
         }
+    }
+
+    fun extractAccountTypeAndIDFromJWT(token: String) {
+        val splitString = token.split(".")
+        val base64EncodedBody = splitString[1]
+        val body = android.util.Base64.decode(base64EncodedBody, android.util.Base64.DEFAULT);
+        val bodyStr = String(body)
+        val parser = Parser()
+        val stringBuilder = StringBuilder(bodyStr)
+        val json: JsonObject = parser.parse(stringBuilder) as JsonObject
+
+        val editor = preferences.edit()
+        val accountType = json.string("account_type")
+        val accountId = json.int("account_id")
+
+        editor.putString("accountType", accountType)
+        editor.putInt("accountId", accountId!!)
+
+        editor.apply()
+        Log.i(TAG, "Account type: $accountType and Id: $accountId")
     }
 
     fun saveUserToDevice(email: String?, password: String?) {
@@ -241,6 +245,17 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
         val editor = preferences.edit()
         editor.remove("email")
         editor.remove("password")
+        editor.remove("signedIn")
         editor.apply()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        progressDialog.dismiss()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        progressDialog.dismiss()
     }
 }
