@@ -28,6 +28,15 @@ class SignInFormCreator(var context: Context) {
         layout.addView(submitButton)
     }
 
+    fun fillInAccount(account: Account) {
+        emailField.editText.setText(account.email)
+        passwordField.editText.setText(account.password)
+    }
+
+    fun resetPasswordField() {
+        passwordField.editText.setText("")
+    }
+
     fun getAccount() : Account {
         return Account(emailField.getText(), passwordField.getText())
     }

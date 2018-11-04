@@ -46,6 +46,10 @@ class InstructorSignUpFormCreator(var context: Context) {
         layout.addView(submitButton)
     }
 
+    fun resetPasswordField() {
+        passwordField.editText.setText("")
+    }
+
     fun getInstructor() : Instructor {
         var instructor = Instructor(
                 firstnameField.getText(),

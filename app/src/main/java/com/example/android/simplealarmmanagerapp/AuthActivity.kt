@@ -4,12 +4,14 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
 import android.os.AsyncTask
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Switch
+import android.widget.Toast
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
 import com.example.android.simplealarmmanagerapp.form_creators.InstructorSignUpFormCreator
@@ -55,13 +57,6 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
         preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
         progressDialog = ProgressDialog(context)
 
-        if (preferences.getBoolean("signedIn", false)) {
-            val email = preferences.getString("email", "")
-            val password = preferences.getString("password", "")
-            val account = Account(email, password)
-            performSignInWithProgressDialog(account)
-        }
-
         signInFormCreator = SignInFormCreator(this)
         studentSignUpFormCreator = StudentSignUpFormCreator(this)
         instructorSignUpFormCreator = InstructorSignUpFormCreator(this)
@@ -76,10 +71,18 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
 
 
         auth_form_layout.addView(signInFormCreator.layout)
-        authenticationMode = AuthenticationMode.SIGNIN
 
+        if (preferences.getBoolean("signedIn", false)) {
+            val email = preferences.getString("email", "")
+            val password = preferences.getString("password", "")
+            val account = Account(email, password)
+            signInFormCreator.fillInAccount(account)
+            performSignInWithProgressDialog(account)
+        }
+
+        // Sign-in/Sign-up toggling.
         val toggle: Switch = findViewById(R.id.auth_switch)
-
+        authenticationMode = AuthenticationMode.SIGNIN
         toggle.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 auth_form_layout.removeAllViews()
@@ -123,21 +126,29 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    fun performSignInWithProgressDialog(account: Account) {
-        Log.i(TAG, "Sign-in started.")
-        progressDialog.setMessage("Signing in...")
-        progressDialog.setCancelable(false)
-        progressDialog.show()
-        SignInPerformerInBackground().execute(account)
+    private fun performSignInWithProgressDialog(account: Account) {
+        if (verifyAvailableNetwork()) {
+            Log.i(TAG, "Sign-in started.")
+            progressDialog.setMessage("Signing in...")
+            progressDialog.setCancelable(false)
+            progressDialog.show()
+            SignInPerformerInBackground().execute(account)
+        } else {
+            Toast.makeText(context, "No internet connectivity =(", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    fun performSignUpWithProgressDialog(student: Student) {
-        Log.i(TAG, "Student sign-up started")
-        progressDialog = ProgressDialog(context)
-        progressDialog.setMessage("Signing up...")
-        progressDialog.setCancelable(false)
-        progressDialog.show()
-        StudentSignUpPerformerInBackground().execute(student)
+    private fun performSignUpWithProgressDialog(student: Student) {
+        if (verifyAvailableNetwork()) {
+            Log.i(TAG, "Student sign-up started")
+            progressDialog = ProgressDialog(context)
+            progressDialog.setMessage("Signing up...")
+            progressDialog.setCancelable(false)
+            progressDialog.show()
+            StudentSignUpPerformerInBackground().execute(student)
+        } else {
+            Toast.makeText(context, "No internet connectivity =(", Toast.LENGTH_SHORT).show()
+        }
     }
 
     inner class SignInPerformerInBackground: AsyncTask<Account, String, Response>() {
@@ -159,8 +170,6 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
 
         override fun onPostExecute(r: Response) {
             if (r.statusCode == 200 && r.text == "\"\"") {
-                progressDialog.dismiss()
-
                 Log.i(TAG, "Successful sign-in")
 
                 preferences.edit().putBoolean("signedIn", true).apply()
@@ -171,10 +180,26 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
                 val navigateToMainPage = Intent(context, HomeActivity::class.java)
                 startActivity(navigateToMainPage)
             } else {
-                Log.i(TAG, "Failed account sign in.")
+                val parser = Parser()
+                val stringBuilder = StringBuilder(r.text)
+                val json: JsonObject = parser.parse(stringBuilder) as JsonObject
+                val errorMessage = json["message"].toString()
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+
+                Log.i(TAG, "Failed account sign in. $errorMessage")
+
+                signInFormCreator.resetPasswordField()
+
                 removeUserFromDevice()
             }
+            progressDialog.dismiss()
         }
+    }
+
+    fun verifyAvailableNetwork() : Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo = connectivityManager.activeNetworkInfo
+        return  networkInfo!=null && networkInfo.isConnected
     }
 
     inner class StudentSignUpPerformerInBackground: AsyncTask<Student, String, Response>() {
@@ -196,26 +221,35 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
 
         override fun onPostExecute(r: Response) {
             if (r.statusCode == 201) {
-                progressDialog.dismiss()
-
                 Log.i(TAG, "Successful student sign up.")
 
                 preferences.edit().putBoolean("signedIn", true).apply()
 
-                val jwtToken = r.headers["X-Auth"].toString()
-                extractAccountTypeAndIDFromJWT(jwtToken)
+                val jwt = r.headers["X-Auth"].toString()
+                extractAccountTypeAndIDFromJWT(jwt)
 
                 val navigateToMainPage = Intent(context, CourseListActivity::class.java)
                 startActivity(navigateToMainPage)
             } else {
-                Log.i(TAG, "Failed student sign up.")
+                val parser = Parser()
+                val stringBuilder = StringBuilder(r.text)
+                val json: JsonObject = parser.parse(stringBuilder) as JsonObject
+                val errorMessage = json["message"].toString()
+
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+
+                Log.i(TAG, "Failed student sign up: $errorMessage")
+
+                studentSignUpFormCreator.resetPasswordField()
+
                 removeUserFromDevice()
             }
+            progressDialog.dismiss()
         }
     }
 
-    fun extractAccountTypeAndIDFromJWT(token: String) {
-        val splitString = token.split(".")
+    fun extractAccountTypeAndIDFromJWT(jwt: String) {
+        val splitString = jwt.split(".")
         val base64EncodedBody = splitString[1]
         val body = android.util.Base64.decode(base64EncodedBody, android.util.Base64.DEFAULT);
         val bodyStr = String(body)
@@ -227,6 +261,7 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
         val accountType = json.string("account_type")
         val accountId = json.int("account_id")
 
+        editor.putString("jwt", jwt)
         editor.putString("accountType", accountType)
         editor.putInt("accountId", accountId!!)
 

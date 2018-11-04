@@ -2,7 +2,6 @@ package com.example.android.simplealarmmanagerapp
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
@@ -11,26 +10,21 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ArrayAdapter
 import android.widget.ListView
-import android.widget.TextView
+import com.example.android.simplealarmmanagerapp.constants.PREFERENCES_NAME
+import com.example.android.simplealarmmanagerapp.fragments.SectionListFragment
+import com.example.android.simplealarmmanagerapp.fragments.SetTargetBeaconFragment
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.app_bar_home.*
-import kotlinx.android.synthetic.main.nav_header_home.*
-import org.json.JSONArray
 
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     val TAG = "HomeActivity"
-
     val STUDENT_URL = "https://attendance-app-dev.herokuapp.com/api/v1/students"
-    var SECTION_SUFFIX = "sections"
 
-    val PREFERENCES_NAME = "AuthenticationPreferences"
     lateinit var preferences: SharedPreferences
 
     lateinit var context: Context
-    lateinit var courseList: ArrayList<String>
-    lateinit var courseListView : ListView
+    lateinit var sectionList: ArrayList<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,30 +40,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         context = this
         preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-
-        courseListView = findViewById(R.id.section_list_view)
-        courseList = ArrayList()
-
-        val studentId = preferences.getInt("accountId", 0)
-        CourseListLoaderInBackground().execute(studentId)
-    }
-
-    inner class CourseListLoaderInBackground: AsyncTask<Int, String, JSONArray>() {
-        override fun doInBackground(vararg studentIds: Int?): JSONArray {
-            val studentId = studentIds[0]
-            val response = khttp.get("$STUDENT_URL/$studentId/$SECTION_SUFFIX")
-            Log.i(TAG, "Response: $response")
-            return response.jsonArray
-        }
-
-        override fun onPostExecute(courses: JSONArray) {
-            for (i in 0..(courses.length() - 1)) {
-                courseList.add(courses.getJSONObject(i).getString("title"))
-            }
-
-            var adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, courseList)
-            courseListView.adapter = adapter
-        }
+        sectionList = ArrayList()
     }
 
     override fun onBackPressed() {
@@ -97,21 +68,27 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        // Handle navigation view item clicks here.
+        val fragmentManager = getFragmentManager()
         when (item.itemId) {
             R.id.nav_courses -> {
-                // Handle the camera action
+                fragmentManager.beginTransaction().replace(R.id.content_frame, SectionListFragment()).commit()
             }
             R.id.nav_attendance -> {
 
+            }
+            R.id.set_beacon_target -> {
+                fragmentManager.beginTransaction().replace(R.id.content_frame, SetTargetBeaconFragment()).commit()
             }
             R.id.nav_sign_out -> {
                 val editor = preferences.edit()
                 editor.remove("email")
                 editor.remove("password")
                 editor.remove("signedIn")
+                editor.remove("jwt")
                 editor.apply()
                 finish()
+
+                Log.i(TAG, "User signed out!")
             }
         }
 

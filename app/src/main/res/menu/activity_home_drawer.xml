@@ -17,6 +17,10 @@
     <item android:title="Communicate">
         <menu>
             <item
+                android:id="@+id/set_beacon_target"
+                android:icon="@drawable/ic_baseline_bluetooth_24px"
+                android:title="Set beacon target" />
+            <item
                 android:id="@+id/nav_sign_out"
                 android:icon="@drawable/ic_baseline_exit_to_app_24px"
                 android:title="Sign out" />

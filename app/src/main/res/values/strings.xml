@@ -21,4 +21,7 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+    <string name="target_beacon_address">Enter Beacon address. Example: C0:34:D3:21:3D:E4</string>
+    <string name="set_target_beacon_text">Set a target beacon.</string>
+    <string name="save">Save</string>
 </resources>

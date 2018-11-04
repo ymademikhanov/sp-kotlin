@@ -45,6 +45,10 @@ class StudentSignUpFormCreator(var context: Context) {
         layout.addView(submitButton)
     }
 
+    fun resetPasswordField() {
+        passwordField.editText.setText("")
+    }
+
     fun getStudent() : Student {
         var student = Student(
                 studentIdField.getText().toInt(),
