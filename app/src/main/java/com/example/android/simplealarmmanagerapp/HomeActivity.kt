@@ -44,9 +44,12 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
-            drawer_layout.closeDrawer(GravityCompat.START)
+        val fm = fragmentManager
+        if (fm.backStackEntryCount > 0) {
+            Log.i("MainActivity", "popping backstack")
+            fm.popBackStack()
         } else {
+            Log.i("MainActivity", "nothing on backstack, calling super")
             super.onBackPressed()
         }
     }

@@ -5,12 +5,11 @@ import android.app.NotificationManager
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.IBinder
 import android.util.Log
+import com.example.android.simplealarmmanagerapp.constants.PREFERENCES_NAME
+import com.example.android.simplealarmmanagerapp.constants.TARGET_BEACON_ADDRESS_PREFERENCE_CONST
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -19,6 +18,7 @@ class BluetoothService : Service() {
     var TAG = "BluetoothService"
 
     val mBluetoothAdapter : BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    lateinit var preferences: SharedPreferences
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -26,6 +26,7 @@ class BluetoothService : Service() {
 
     override fun onCreate() {
         ShowLog("onCreate()")
+        preferences = applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
         super.onCreate()
     }
 
@@ -67,8 +68,8 @@ class BluetoothService : Service() {
 
         fun createNotification(context: Context, deviceName: String, deviceHardwareAddress: String) {
             val builder = Notification.Builder(context)
-                    .setContentTitle("Name: " + deviceName)
-                    .setContentText("Address: " + deviceHardwareAddress)
+                    .setContentTitle("Found a target beacon")
+                    .setContentText("Address is $deviceHardwareAddress")
                     .setSmallIcon(R.drawable.notification_icon_background)
 
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -93,11 +94,19 @@ class BluetoothService : Service() {
                     if (deviceName == null) {
                         deviceName = "something"
                     }
-                    createNotification(context, deviceName, deviceHardwareAddress)
 
-//                    ShowLog("Found BT device with name: " + deviceName + " and address: " + deviceHardwareAddress)
+                    ShowLog("Found BT device with name: " + deviceName + " and address: " + deviceHardwareAddress)
 
-                    if (deviceName.equals("ymademikhanov")) {
+                    var targetAddress = preferences.getString(TARGET_BEACON_ADDRESS_PREFERENCE_CONST, "")
+
+                    val re = Regex("[^A-Za-z0-9 ]")
+                    targetAddress = re.replace(targetAddress, "")
+                    deviceName = re.replace(deviceName, "")
+
+                    if (deviceName.equals(targetAddress)) {
+
+                        createNotification(context, deviceName, deviceHardwareAddress)
+
                         ShowLog("CHECKIN IS DONE!")
                         ShowLog("Cancelling discovery")
                         while (mBluetoothAdapter.isDiscovering) {
@@ -105,9 +114,7 @@ class BluetoothService : Service() {
                         }
                         ShowLog("Disabling bluetooth")
                         mBluetoothAdapter.disable()
-
                     }
-
                 }
             }
         }

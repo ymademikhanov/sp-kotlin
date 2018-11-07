@@ -71,10 +71,12 @@ class MainActivity : AppCompatActivity() {
             var start_time = start_within
             while (checks_number > 0) {
 
+
                 val intent = Intent(context, BeaconScanner::class.java)
                 val pendingIntent = PendingIntent.getBroadcast(context, Random().nextInt(1000000), intent, PendingIntent.FLAG_ONE_SHOT)
-                ShowLog("Alarm was created for " + start_time + " millis.")
                 alarmManager.setExact(AlarmManager.RTC,offset + start_time, pendingIntent)
+
+                ShowLog("Alarm was created for " + start_time + " millis.")
 
                 start_time += interval
                 checks_number -= 1
