@@ -82,7 +82,7 @@ class ClassListFragment : Fragment() {
 
                     var nextStartTime = findNextClassTime(c.start)
                     var nextEndTime = findNextClassTime(c.end)
-                    var interval = (nextEndTime - nextStartTime) / c.checksTotal!!
+                    var interval = (nextEndTime - nextStartTime) / c.checks!!
 
                     Log.i(TAG, "The next start time is ${getDateTime(nextStartTime)}")
                     Log.i(TAG, "The next end time is ${getDateTime(nextEndTime)}")

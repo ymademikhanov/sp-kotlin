@@ -9,7 +9,7 @@ class Section(var id: Int? = null,
     var roomId: Int? = null,
 
     var course: Course? = null,
-    var room: Room? = null,
+    var room: String? = null,
     var sectionSlots: List<SectionSlot>? = null,
     var students: List<Student>? = null,
     var instructors: List<Instructor>? = null,

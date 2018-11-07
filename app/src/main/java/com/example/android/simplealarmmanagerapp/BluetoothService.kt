@@ -6,11 +6,14 @@ import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.*
+import android.os.AsyncTask
 import android.os.IBinder
 import android.util.Log
+import com.example.android.simplealarmmanagerapp.constants.ATTENDANCE_URL
 import com.example.android.simplealarmmanagerapp.constants.PREFERENCES_NAME
 import com.example.android.simplealarmmanagerapp.constants.TARGET_BEACON_ADDRESS_PREFERENCE_CONST
-import java.util.*
+import khttp.post
+import khttp.responses.Response
 import kotlin.concurrent.thread
 
 class BluetoothService : Service() {
@@ -20,42 +23,38 @@ class BluetoothService : Service() {
     val mBluetoothAdapter : BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
     lateinit var preferences: SharedPreferences
 
+    var classId : Int = 0
+    var studentId : Int = 0
+    lateinit var targetAddress : String
+
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
 
     override fun onCreate() {
-        ShowLog("onCreate()")
+        Log.i(TAG, "onCreate()")
         preferences = applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
         super.onCreate()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        ShowLog("onStartCommand()")
+        Log.i(TAG, "onStartCommand()")
 
         val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
 
-        mBluetoothAdapter.enable()
+        studentId = preferences.getInt("accountId", 0)
+        targetAddress = preferences.getString(TARGET_BEACON_ADDRESS_PREFERENCE_CONST, "")
+        classId = intent!!.getIntExtra("classId", 0)
 
-        var i = 0
-        while (!mBluetoothAdapter.isEnabled) {
-            i += 1
-        }
-
-        mBluetoothAdapter.startDiscovery()
         registerReceiver(mReceiver, filter)
+
+        enableBluetoothAndStartDiscovery()
 
         thread() {
             Thread.sleep(12000)
-            ShowLog("Cancelling discovery")
-            while (mBluetoothAdapter.isDiscovering) {
-                mBluetoothAdapter.cancelDiscovery()
-            }
-            ShowLog("Disabling bluetooth")
-            mBluetoothAdapter.disable()
-
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.cancelAll()
+            stopDiscoverAndDisableBluetooth()
+//            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+//            notificationManager.cancelAll()
             stopService(intent)
         }
 
@@ -75,17 +74,15 @@ class BluetoothService : Service() {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.notify(counter, builder.build())
             counter += 1
-            ShowLog("Counter " + counter)
         }
 
         override fun onReceive(context: Context, intent: Intent) {
             val action: String = intent.action
 
-            ShowLog("onReceive in Bluetooth signal receiver")
+            Log.i(TAG, "onReceive in Bluetooth signal receiver")
+
             when(action) {
                 BluetoothDevice.ACTION_FOUND -> {
-                    // Discovery has found a device. Get the BluetoothDevice
-                    // object and its info from the Intent.
                     var device: BluetoothDevice =
                             intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                     var deviceName = device.name
@@ -95,32 +92,65 @@ class BluetoothService : Service() {
                         deviceName = "something"
                     }
 
-                    ShowLog("Found BT device with name: " + deviceName + " and address: " + deviceHardwareAddress)
-
-                    var targetAddress = preferences.getString(TARGET_BEACON_ADDRESS_PREFERENCE_CONST, "")
+                    Log.i(TAG, "Found a BT device with address = $deviceHardwareAddress")
 
                     val re = Regex("[^A-Za-z0-9 ]")
-                    targetAddress = re.replace(targetAddress, "")
-                    deviceName = re.replace(deviceName, "")
+                    val target = re.replace(targetAddress, "")
+                    val current = re.replace(deviceName, "")
 
-                    if (deviceName.equals(targetAddress)) {
+                    if (current.equals(target)) {
 
                         createNotification(context, deviceName, deviceHardwareAddress)
 
-                        ShowLog("CHECKIN IS DONE!")
-                        ShowLog("Cancelling discovery")
-                        while (mBluetoothAdapter.isDiscovering) {
-                            mBluetoothAdapter.cancelDiscovery()
-                        }
-                        ShowLog("Disabling bluetooth")
-                        mBluetoothAdapter.disable()
+                        AttendanceReporter().execute(studentId, classId)
+
+                        stopDiscoverAndDisableBluetooth()
                     }
                 }
             }
         }
     }
 
-    fun ShowLog(message: String) {
-        Log.w(TAG, Date().toString() + " : " + message)
+    fun enableBluetoothAndStartDiscovery() {
+        mBluetoothAdapter.enable()
+        var i = 0
+        while (!mBluetoothAdapter.isEnabled) {
+            i += 1
+        }
+        mBluetoothAdapter.startDiscovery()
+    }
+
+    fun stopDiscoverAndDisableBluetooth() {
+        Log.i(TAG, "Started disabling BT discovery")
+        mBluetoothAdapter.cancelDiscovery()
+        var i = 0
+        while (mBluetoothAdapter.isDiscovering) {
+            i += 1
+        }
+        Log.i(TAG, "Disabled BT discovery")
+        mBluetoothAdapter.disable()
+    }
+
+    inner class AttendanceReporter: AsyncTask<Int, String, Response>() {
+        override fun doInBackground(vararg args: Int?): Response {
+            Log.i(TAG, "Started sending attendance check")
+            val studentId = args[0]
+            val classId = args[1]
+            val data = mapOf("student_id" to studentId, "class_id" to classId)
+            val jwt = preferences.getString("jwt", "")
+
+            Log.i(TAG, "Attendance check data: $data")
+
+            val response = post(ATTENDANCE_URL, data=data, headers=mapOf("x-auth" to jwt))
+
+            Log.i(TAG, "Attendance Report Response: $response")
+            return response
+        }
+
+        override fun onPostExecute(response: Response) {
+            if (response.statusCode == 200) {
+                Log.i(TAG, "Successful attendance report")
+            }
+        }
     }
 }

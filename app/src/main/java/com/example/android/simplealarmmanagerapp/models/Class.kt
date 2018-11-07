@@ -8,10 +8,10 @@ data class Class(val id: Int? = null,
                  val start: Long = 0,
                  val end: Long = 0,
                  @SerializedName("room_id") val roomId: Int? = null,
-                 @SerializedName("checks_total") val checksTotal: Int? = null,
+                 @SerializedName("checks") val checks: Int? = null,
 
     //    Dependent fields
                  val course: Course? = null,
-                 val room: Room? = null,
+                 val room: String? = null,
                  val beacon: Beacon? = null,
                  val section: Section? = null)
