@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
-import com.beust.klaxon.Klaxon
 import com.example.android.simplealarmmanagerapp.ClassListActivity
 import com.example.android.simplealarmmanagerapp.R
 import com.example.android.simplealarmmanagerapp.constants.PREFERENCES_NAME

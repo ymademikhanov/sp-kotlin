@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.AsyncTask
 import android.os.Bundle
+import android.provider.SyncStateContract.Helpers.insert
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -25,9 +26,16 @@ import com.example.android.simplealarmmanagerapp.constants.TARGET_BEACON_ADDRESS
 import com.example.android.simplealarmmanagerapp.models.Class
 import com.google.gson.Gson
 import org.json.JSONArray
+//import org.mapdb.DB
+//import org.mapdb.DBMaker
+//import org.mapdb.DBMaker.fileDB
+//import org.mapdb.Pump.treeMap
+//import org.mapdb.Serializer
+import java.io.File
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.ConcurrentNavigableMap
 
 class ClassListFragment : Fragment() {
     lateinit var fragmentView: View
@@ -87,10 +95,18 @@ class ClassListFragment : Fragment() {
                     Log.i(TAG, "The next start time is ${getDateTime(nextStartTime)}")
                     Log.i(TAG, "The next end time is ${getDateTime(nextEndTime)}")
 
+//                    var db = DBMaker.fileDB("/some/file").make()
+
                     while (nextStartTime < nextEndTime) {
                         val intent = Intent(activity, BeaconScanner::class.java)
-                        val pendingIntent = PendingIntent.getBroadcast(activity, Random().nextInt(1000000), intent, PendingIntent.FLAG_ONE_SHOT)
+                        val pendingIntent = PendingIntent.getBroadcast(activity, Random().nextInt(1000000), intent, PendingIntent.FLAG_UPDATE_CURRENT)
                         alarmManager.setExact(AlarmManager.RTC,nextStartTime, pendingIntent)
+
+//                        var inInt = nextStartTime / 1000
+//                        var map = db.hashMap("collectionName", Serializer.INTEGER, Serializer.STRING).createOrOpen()
+//                        map.put(inInt.toInt(), c.id.toString())
+//                        db.commit()
+
                         Log.i(TAG, "The intermediate check is ${getDateTime(nextStartTime)}")
                         nextStartTime += interval
                     }

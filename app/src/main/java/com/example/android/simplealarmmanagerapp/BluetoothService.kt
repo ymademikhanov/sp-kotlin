@@ -14,6 +14,8 @@ import com.example.android.simplealarmmanagerapp.constants.PREFERENCES_NAME
 import com.example.android.simplealarmmanagerapp.constants.TARGET_BEACON_ADDRESS_PREFERENCE_CONST
 import khttp.post
 import khttp.responses.Response
+//import org.mapdb.DBMaker
+//import org.mapdb.Serializer
 import kotlin.concurrent.thread
 
 class BluetoothService : Service() {
@@ -40,25 +42,29 @@ class BluetoothService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i(TAG, "onStartCommand()")
 
-        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-
         studentId = preferences.getInt("accountId", 0)
         targetAddress = preferences.getString(TARGET_BEACON_ADDRESS_PREFERENCE_CONST, "")
-        classId = intent!!.getIntExtra("classId", 0)
 
-        registerReceiver(mReceiver, filter)
+//        val checkTime = System.currentTimeMillis() / 1000
+//        var db = DBMaker.fileDB("/some/file").make()
+//
+//        var map = db.hashMap("collectionName", Serializer.INTEGER, Serializer.STRING).createOrOpen()
+//        classId = map.get(checkTime.toInt())!!.toInt()
 
         enableBluetoothAndStartDiscovery()
 
         thread() {
-            Thread.sleep(12000)
+            Thread.sleep(20000)
             stopDiscoverAndDisableBluetooth()
-//            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-//            notificationManager.cancelAll()
             stopService(intent)
         }
 
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(mReceiver)
     }
 
     private val mReceiver = object : BroadcastReceiver() {
@@ -96,7 +102,7 @@ class BluetoothService : Service() {
 
                     val re = Regex("[^A-Za-z0-9 ]")
                     val target = re.replace(targetAddress, "")
-                    val current = re.replace(deviceName, "")
+                    val current = re.replace(deviceHardwareAddress, "")
 
                     if (current.equals(target)) {
 
@@ -112,12 +118,18 @@ class BluetoothService : Service() {
     }
 
     fun enableBluetoothAndStartDiscovery() {
+        Log.i(TAG, "Started enabling BT discovery")
         mBluetoothAdapter.enable()
         var i = 0
         while (!mBluetoothAdapter.isEnabled) {
             i += 1
         }
         mBluetoothAdapter.startDiscovery()
+        Log.i(TAG, "BT discovery started")
+
+        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
+        registerReceiver(mReceiver, filter)
+        Log.i(TAG, "Registered receiver")
     }
 
     fun stopDiscoverAndDisableBluetooth() {
@@ -150,6 +162,9 @@ class BluetoothService : Service() {
         override fun onPostExecute(response: Response) {
             if (response.statusCode == 200) {
                 Log.i(TAG, "Successful attendance report")
+            } else {
+                Log.i(TAG, "Error: ${response.content}")
+                Log.i(TAG, "Error: ${response.raw}")
             }
         }
     }
