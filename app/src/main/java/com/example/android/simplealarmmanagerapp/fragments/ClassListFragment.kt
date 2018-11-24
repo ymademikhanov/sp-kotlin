@@ -20,6 +20,8 @@ import com.example.android.simplealarmmanagerapp.BeaconScanner
 import com.example.android.simplealarmmanagerapp.R
 import com.example.android.simplealarmmanagerapp.StartingClassNotifier
 import com.example.android.simplealarmmanagerapp.constants.*
+import com.example.android.simplealarmmanagerapp.listview_adapters.ClassListViewAdapter
+import com.example.android.simplealarmmanagerapp.listview_models.ClassListViewModel
 import com.example.android.simplealarmmanagerapp.models.Attendance
 import com.example.android.simplealarmmanagerapp.models.AttendanceCheck
 import com.example.android.simplealarmmanagerapp.models.Class
@@ -37,6 +39,7 @@ class ClassListFragment : Fragment() {
     private var classList: ArrayList<Class> = ArrayList()
     private var classTitleList: ArrayList<String> = ArrayList()
     private var attendanceList: ArrayList<Attendance> = ArrayList()
+    private var classListViewItems: ArrayList<ClassListViewModel> = ArrayList()
     private var attendanceCheckList: ArrayList<AttendanceCheck> = ArrayList()
 
     lateinit var fragmentView: View
@@ -103,22 +106,44 @@ class ClassListFragment : Fragment() {
             val response = khttp.get(url, headers=mapOf("x-auth" to jwt))
             Log.i(TAG, "Response: $response")
             Log.i(TAG, "Response: ${response.jsonArray}")
+
+            val classes = response.jsonArray
+            for (i in 0..(classes.length() - 1)) {
+                val objStr = classes.getJSONObject(i).toString()
+                val universityClass = Gson().fromJson(objStr, Class::class.java)
+
+                Log.i(TAG, "Class: $universityClass")
+
+                val url = "$CLASSES_URL/${universityClass.id}/attendances"
+                val response = khttp.get(url, headers= mapOf("x-auth" to jwt))
+
+                Log.i(TAG, "Response for loading attendance for class is $response")
+
+                val attendances = response.jsonArray
+                val total = attendances.length()
+                var score = 0
+                for (i in 0..(attendances.length() - 1)) {
+                    val objStr = attendances.getJSONObject(i).toString()
+                    val attendance = Gson().fromJson(objStr, Attendance::class.java)
+                    if (attendance.attended!!) {
+                        score += 1
+                    }
+                }
+
+                val classListViewTitle = "${getDateTime(universityClass.start)} - ${getDateTime(universityClass.end)}"
+                val classListViewInfo = "$score out of $total attended"
+                val classListViewModel = ClassListViewModel(classListViewTitle, classListViewInfo)
+
+                classListViewItems.add(classListViewModel)
+                classList.add(universityClass)
+            }
+
             return response.jsonArray
         }
 
         override fun onPostExecute(classes: JSONArray) {
-            for (i in 0..(classes.length() - 1)) {
-                val obj = classes.getJSONObject(i)
-                val objStr = obj.toString()
-                val universityClass = Gson().fromJson(objStr, Class::class.java)
-                Log.i(TAG, "Class: $universityClass")
-                classList.add(universityClass)
-                classTitleList.add("${getDateTime(universityClass.start)} - ${getDateTime(universityClass.end)}")
-            }
-
-            var adapter = ArrayAdapter(activity, android.R.layout.simple_list_item_1, classTitleList)
-            classListView.adapter = adapter
-
+            var classListAdapter = ClassListViewAdapter(activity, R.layout.class_list_view_row, classListViewItems)
+            classListView.adapter = classListAdapter
             progressDialog.dismiss()
         }
     }

@@ -7,8 +7,8 @@ class Attendance(val id: Int? = null,
                  @SerializedName("student_id") val studentId: Int? = null,
                  @SerializedName("class_id") val classId: Int? = null,
                  val attended: Boolean? = null,
-                 val updatedAt: Timestamp? = null,
-                 val createdAt: Timestamp? = null) {
+                 @SerializedName("updated_at") val updatedAt: Long? = null,
+                 @SerializedName("created_at") val createdAt: Long? = null) {
 
     private val checks: List<AttendanceCheck>? = null
 }
