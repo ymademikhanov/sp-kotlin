@@ -6,6 +6,4 @@ class SearchTargetDeviceModel(private var mTitle:String?) : Searchable {
     override fun getTitle(): String {
         return mTitle!!
     }
-
-
 }

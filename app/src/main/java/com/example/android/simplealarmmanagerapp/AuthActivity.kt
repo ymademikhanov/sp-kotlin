@@ -30,23 +30,17 @@ enum class AuthenticationMode {
 
 class AuthActivity : AppCompatActivity(), View.OnClickListener {
     val TAG = "AuthActivity"
-    val TAG_SIGNIN = TAG + "SignIn"
-    val TAG_SIGNUP = TAG + "SignUp"
-
     val SIGNIN_URL = "https://attendance-app-dev.herokuapp.com/api/v1/auth/signin"
     val STUDENT_URL = "https://attendance-app-dev.herokuapp.com/api/v1/students"
-    val INSTRUCTOR_URL = "https://attendance-app-dev.herokuapp.com/api/v1/instructors"
 
     val PREFERENCES_NAME = "AuthenticationPreferences"
 
+    lateinit var context: Context
+    lateinit var preferences: SharedPreferences
     lateinit var instructorSignUpFormCreator: InstructorSignUpFormCreator
     lateinit var signInFormCreator: SignInFormCreator
     lateinit var studentSignUpFormCreator: StudentSignUpFormCreator
-    lateinit var context: Context
-    lateinit var preferences: SharedPreferences
-
     lateinit var authenticationMode: AuthenticationMode
-
     lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -154,29 +148,19 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
     inner class SignInPerformerInBackground: AsyncTask<Account, String, Response>() {
         override fun doInBackground(vararg accounts: Account?): Response {
             val account = accounts[0]
-
             val data = account?.getJSON()
-
             Log.i(TAG, "Sign-in account data: $data")
-
             saveUserToDevice(account?.email, account?.password)
-
             val response = post(SIGNIN_URL, data= data)
-
             Log.i(TAG, "Response: $response")
-
             return response
         }
 
         override fun onPostExecute(r: Response) {
             if (r.statusCode == 200 && r.text == "\"\"") {
                 Log.i(TAG, "Successful sign-in")
-
-                preferences.edit().putBoolean("signedIn", true).apply()
-
                 val jwtToken = r.headers["X-Auth"].toString()
                 extractAccountTypeAndIDFromJWT(jwtToken)
-
                 val navigateToMainPage = Intent(context, HomeActivity::class.java)
                 startActivity(navigateToMainPage)
             } else {
@@ -184,12 +168,9 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
                 val stringBuilder = StringBuilder(r.text)
                 val json: JsonObject = parser.parse(stringBuilder) as JsonObject
                 val errorMessage = json["message"].toString()
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-
                 Log.i(TAG, "Failed account sign in. $errorMessage")
-
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                 signInFormCreator.resetPasswordField()
-
                 removeUserFromDevice()
             }
             progressDialog.dismiss()
@@ -199,35 +180,25 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
     fun verifyAvailableNetwork() : Boolean {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo = connectivityManager.activeNetworkInfo
-        return  networkInfo!=null && networkInfo.isConnected
+        return networkInfo != null && networkInfo.isConnected
     }
 
     inner class StudentSignUpPerformerInBackground: AsyncTask<Student, String, Response>() {
         override fun doInBackground(vararg students: Student?): Response {
             val student = students[0]
-
             val data = student?.getJSON()
-
             Log.i(TAG, "Sign-up student data: $data")
-
             saveUserToDevice(student?.email, student?.password)
-
             val response = post(STUDENT_URL, data=data)
-
             Log.i(TAG, "Student sign-up. Response: $response")
-
             return response
         }
 
         override fun onPostExecute(r: Response) {
             if (r.statusCode == 201) {
                 Log.i(TAG, "Successful student sign up.")
-
-                preferences.edit().putBoolean("signedIn", true).apply()
-
                 val jwt = r.headers["X-Auth"].toString()
                 extractAccountTypeAndIDFromJWT(jwt)
-
                 val navigateToMainPage = Intent(context, CourseListActivity::class.java)
                 startActivity(navigateToMainPage)
             } else {
@@ -235,13 +206,9 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
                 val stringBuilder = StringBuilder(r.text)
                 val json: JsonObject = parser.parse(stringBuilder) as JsonObject
                 val errorMessage = json["message"].toString()
-
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-
                 Log.i(TAG, "Failed student sign up: $errorMessage")
-
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                 studentSignUpFormCreator.resetPasswordField()
-
                 removeUserFromDevice()
             }
             progressDialog.dismiss()
@@ -273,6 +240,7 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
         val editor = preferences.edit()
         editor.putString("email", email)
         editor.putString("password", password)
+        editor.putBoolean("signedIn", true)
         editor.apply()
     }
 

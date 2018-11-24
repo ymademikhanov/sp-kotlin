@@ -1,22 +1,15 @@
 package com.example.android.simplealarmmanagerapp
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.AsyncTask
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.ListView
-import com.example.android.simplealarmmanagerapp.models.Account
 import khttp.get
-import khttp.post
-import khttp.responses.Response
 import org.json.JSONArray
-import org.json.JSONObject
-import java.util.*
 import kotlin.collections.ArrayList
 
 class CourseListActivity : AppCompatActivity() {

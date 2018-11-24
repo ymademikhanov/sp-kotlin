@@ -6,28 +6,30 @@ import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.*
+import android.net.wifi.WifiManager
 import android.os.AsyncTask
 import android.os.IBinder
 import android.util.Log
 import com.example.android.simplealarmmanagerapp.constants.ATTENDANCE_URL
 import com.example.android.simplealarmmanagerapp.constants.PREFERENCES_NAME
 import com.example.android.simplealarmmanagerapp.constants.TARGET_BEACON_ADDRESS_PREFERENCE_CONST
+import com.example.android.simplealarmmanagerapp.constants.TIME_TO_CLASS_ID
+import khttp.patch
 import khttp.post
 import khttp.responses.Response
-//import org.mapdb.DBMaker
-//import org.mapdb.Serializer
+import org.json.JSONObject
 import kotlin.concurrent.thread
 
 class BluetoothService : Service() {
-
     var TAG = "BluetoothService"
 
-    val mBluetoothAdapter : BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
     lateinit var preferences: SharedPreferences
-
-    var classId : Int = 0
-    var studentId : Int = 0
+    lateinit var preferencesTimeToClass: SharedPreferences
     lateinit var targetAddress : String
+
+    val mBluetoothAdapter : BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    var attendanceId : Int = 0
+    var attendanceCheckId : Int = 0
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -36,20 +38,19 @@ class BluetoothService : Service() {
     override fun onCreate() {
         Log.i(TAG, "onCreate()")
         preferences = applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        preferencesTimeToClass = applicationContext.getSharedPreferences(TIME_TO_CLASS_ID, Context.MODE_PRIVATE)
         super.onCreate()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i(TAG, "onStartCommand()")
-
-        studentId = preferences.getInt("accountId", 0)
         targetAddress = preferences.getString(TARGET_BEACON_ADDRESS_PREFERENCE_CONST, "")
 
-//        val checkTime = System.currentTimeMillis() / 1000
-//        var db = DBMaker.fileDB("/some/file").make()
-//
-//        var map = db.hashMap("collectionName", Serializer.INTEGER, Serializer.STRING).createOrOpen()
-//        classId = map.get(checkTime.toInt())!!.toInt()
+        attendanceId = intent!!.getIntExtra("attendanceId", 0)
+        attendanceCheckId = intent!!.getIntExtra("attendanceCheckId", 0)
+
+        Log.i(TAG, "Attendance ID: $attendanceId")
+        Log.i(TAG, "Attendance Check ID: $attendanceCheckId")
 
         enableBluetoothAndStartDiscovery()
 
@@ -106,9 +107,8 @@ class BluetoothService : Service() {
 
                     if (current.equals(target)) {
 
+                        AttendanceReporter().execute(attendanceId)
                         createNotification(context, deviceName, deviceHardwareAddress)
-
-                        AttendanceReporter().execute(studentId, classId)
 
                         stopDiscoverAndDisableBluetooth()
                     }
@@ -117,8 +117,8 @@ class BluetoothService : Service() {
         }
     }
 
-    fun enableBluetoothAndStartDiscovery() {
-        Log.i(TAG, "Started enabling BT discovery")
+    private fun enableBluetoothAndStartDiscovery() {
+        Log.i(TAG, "Enabling BT discovery")
         mBluetoothAdapter.enable()
         var i = 0
         while (!mBluetoothAdapter.isEnabled) {
@@ -133,12 +133,13 @@ class BluetoothService : Service() {
     }
 
     fun stopDiscoverAndDisableBluetooth() {
-        Log.i(TAG, "Started disabling BT discovery")
+        Log.i(TAG, "Disabling BT discovery")
         mBluetoothAdapter.cancelDiscovery()
         var i = 0
         while (mBluetoothAdapter.isDiscovering) {
             i += 1
         }
+
         Log.i(TAG, "Disabled BT discovery")
         mBluetoothAdapter.disable()
     }
@@ -146,14 +147,18 @@ class BluetoothService : Service() {
     inner class AttendanceReporter: AsyncTask<Int, String, Response>() {
         override fun doInBackground(vararg args: Int?): Response {
             Log.i(TAG, "Started sending attendance check")
-            val studentId = args[0]
-            val classId = args[1]
-            val data = mapOf("student_id" to studentId, "class_id" to classId)
+            val attendanceId = args[0]
+            val checkTime = System.currentTimeMillis()
+            val data = mapOf("attendance_id" to attendanceId, "checked" to true, "timestamp" to checkTime)
             val jwt = preferences.getString("jwt", "")
 
             Log.i(TAG, "Attendance check data: $data")
+            Log.i(TAG, "JWT token: $jwt")
 
-            val response = post(ATTENDANCE_URL, data=data, headers=mapOf("x-auth" to jwt))
+            val url = "$ATTENDANCE_URL/checks/$attendanceCheckId"
+
+            Log.i(TAG, "Url to send report $url")
+            val response = patch(url, data= JSONObject(data), headers = mapOf("x-auth" to jwt))
 
             Log.i(TAG, "Attendance Report Response: $response")
             return response
@@ -163,9 +168,14 @@ class BluetoothService : Service() {
             if (response.statusCode == 200) {
                 Log.i(TAG, "Successful attendance report")
             } else {
-                Log.i(TAG, "Error: ${response.content}")
-                Log.i(TAG, "Error: ${response.raw}")
+                Log.i(TAG, "Attendance Reporter Error Content: ${response.content}")
+                Log.i(TAG, "Attendance Reporter Error Raw: ${response.raw}")
             }
+
+//            val wifiManager = applicationContext?.getSystemService(Context.WIFI_SERVICE) as WifiManager
+//            while (wifiManager.isWifiEnabled) {
+//                wifiManager.isWifiEnabled = false
+//            }
         }
     }
 }

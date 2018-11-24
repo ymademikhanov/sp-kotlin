@@ -10,7 +10,6 @@ data class Class(val id: Int? = null,
                  @SerializedName("room_id") val roomId: Int? = null,
                  @SerializedName("checks") val checks: Int? = null,
 
-    //    Dependent fields
                  val course: Course? = null,
                  val room: String? = null,
                  val beacon: Beacon? = null,

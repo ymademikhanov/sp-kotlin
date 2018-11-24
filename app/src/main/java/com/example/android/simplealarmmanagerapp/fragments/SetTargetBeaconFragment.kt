@@ -13,8 +13,7 @@ import com.example.android.simplealarmmanagerapp.constants.PREFERENCES_NAME
 import com.example.android.simplealarmmanagerapp.constants.TARGET_BEACON_ADDRESS_PREFERENCE_CONST
 
 class SetTargetBeaconFragment : Fragment() {
-    private lateinit var preferences: SharedPreferences
-
+    lateinit var preferences: SharedPreferences
     lateinit var setTargetBeaconView: View
     lateinit var saveButton: Button
     lateinit var targetBeaconAddressEditText: EditText
@@ -26,9 +25,7 @@ class SetTargetBeaconFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         preferences = activity.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-
         targetBeaconAddressEditText = view.findViewById(R.id.target_beacon_address_et)
 
         val targetBeaconAddress = preferences.getString(TARGET_BEACON_ADDRESS_PREFERENCE_CONST, "")
@@ -39,7 +36,7 @@ class SetTargetBeaconFragment : Fragment() {
             override fun onClick(v: View?) {
                 val editor = preferences.edit()
                 editor.putString(TARGET_BEACON_ADDRESS_PREFERENCE_CONST, targetBeaconAddressEditText.text.toString())
-                editor.commit()
+                editor.apply()
             }
         })
 

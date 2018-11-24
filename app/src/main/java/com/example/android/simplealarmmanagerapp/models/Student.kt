@@ -2,20 +2,7 @@ package com.example.android.simplealarmmanagerapp.models
 
 import org.json.JSONObject
 
-class Student : Account {
-    var studentId: Int = 1
-    var firstname: String = "Anuar"
-    var lastname: String = "Otynshin"
-
-    constructor(studentId: Int,
-                firstname: String,
-                lastname: String,
-                email: String,
-                password: String) : super(email, password) {
-        this.studentId = studentId
-        this.firstname = firstname
-        this.lastname = lastname
-    }
+class Student(var studentId: Int, var firstname: String, var lastname: String, email: String, password: String) : Account(email, password) {
 
     override fun toString(): String {
         return "{" + "studentId: " + studentId + "\n firstname: " + firstname + "\n lastname: " + lastname  + "\n" + super.toString() + " } "

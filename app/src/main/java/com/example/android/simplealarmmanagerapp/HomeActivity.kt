@@ -19,10 +19,8 @@ import kotlinx.android.synthetic.main.app_bar_home.*
 
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     val TAG = "HomeActivity"
-    val STUDENT_URL = "https://attendance-app-dev.herokuapp.com/api/v1/students"
 
     lateinit var preferences: SharedPreferences
-
     lateinit var context: Context
     lateinit var sectionList: ArrayList<String>
 
@@ -37,7 +35,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
-
         context = this
         preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
         sectionList = ArrayList()
@@ -90,11 +87,9 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 editor.remove("jwt")
                 editor.apply()
                 finish()
-
                 Log.i(TAG, "User signed out!")
             }
         }
-
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
