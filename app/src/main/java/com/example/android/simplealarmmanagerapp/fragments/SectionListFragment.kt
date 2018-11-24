@@ -16,6 +16,7 @@ import com.example.android.simplealarmmanagerapp.R
 import com.example.android.simplealarmmanagerapp.constants.PREFERENCES_NAME
 import com.example.android.simplealarmmanagerapp.constants.SECTION_ID_EXTRA
 import com.example.android.simplealarmmanagerapp.constants.MY_SECTION_URL
+import com.example.android.simplealarmmanagerapp.constants.SECTION_COURSE_TITLE
 import com.example.android.simplealarmmanagerapp.models.Section
 import com.google.gson.Gson
 import org.json.JSONArray
@@ -24,6 +25,7 @@ class SectionListFragment : Fragment() {
     val TAG = "SectionListFragment"
 
     private var sectionList: ArrayList<Section> = ArrayList()
+    private var sectionTitleList: ArrayList<String> = ArrayList()
 
     lateinit var preferences: SharedPreferences
     lateinit var fragmentView: View
@@ -44,6 +46,7 @@ class SectionListFragment : Fragment() {
         sectionListView.setOnItemClickListener { _, _, position, _ ->
             val editor = preferences.edit()
             editor.putInt(SECTION_ID_EXTRA, sectionList[position].id!!)
+            editor.putString(SECTION_COURSE_TITLE, sectionList[position].course?.title)
             editor.apply()
 
             val fr = ClassListFragment()
@@ -65,6 +68,7 @@ class SectionListFragment : Fragment() {
 
     inner class SectionListLoaderInBackground: AsyncTask<String, String, JSONArray>() {
         override fun doInBackground(vararg jwts: String): JSONArray {
+            sectionTitleList.clear()
             sectionList.clear()
             val jwt = jwts[0]
             val response = khttp.get(MY_SECTION_URL, headers=mapOf("x-auth" to jwt))
@@ -80,8 +84,9 @@ class SectionListFragment : Fragment() {
                 Log.i(TAG, "Object JSON: $objectJSONString")
                 Log.i(TAG, "Section: $section")
                 sectionList.add(section)
+                sectionTitleList.add(section.course!!.title)
             }
-            var adapter = ArrayAdapter(activity, android.R.layout.simple_list_item_1, sectionList)
+            var adapter = ArrayAdapter(activity, android.R.layout.simple_list_item_1, sectionTitleList)
             sectionListView.adapter = adapter
             progressDialog.dismiss()
         }

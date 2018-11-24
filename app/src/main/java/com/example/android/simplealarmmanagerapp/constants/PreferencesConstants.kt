@@ -11,3 +11,5 @@ const val ATTENDANCE_URL = "https://attendance-app-dev.herokuapp.com/api/v1/atte
 const val SECTION_ID_EXTRA = "sectionIdExtra"
 
 const val TIME_TO_CLASS_ID = "timeToClassId"
+
+const val SECTION_COURSE_TITLE = "sectionCourseTitle"

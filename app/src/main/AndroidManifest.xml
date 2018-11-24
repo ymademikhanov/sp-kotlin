@@ -25,6 +25,7 @@
         <activity android:name=".CourseListActivity" />
 
         <receiver android:name=".BeaconScanner" />
+        <receiver android:name=".StartingClassNotifier" />
 
         <service
             android:name=".BluetoothService"

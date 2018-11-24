@@ -18,6 +18,7 @@ import android.widget.Button
 import android.widget.ListView
 import com.example.android.simplealarmmanagerapp.BeaconScanner
 import com.example.android.simplealarmmanagerapp.R
+import com.example.android.simplealarmmanagerapp.StartingClassNotifier
 import com.example.android.simplealarmmanagerapp.constants.*
 import com.example.android.simplealarmmanagerapp.models.Attendance
 import com.example.android.simplealarmmanagerapp.models.AttendanceCheck
@@ -34,6 +35,7 @@ class ClassListFragment : Fragment() {
     private lateinit var preferences: SharedPreferences
     private lateinit var preferencesTimeToClass: SharedPreferences
     private var classList: ArrayList<Class> = ArrayList()
+    private var classTitleList: ArrayList<String> = ArrayList()
     private var attendanceList: ArrayList<Attendance> = ArrayList()
     private var attendanceCheckList: ArrayList<AttendanceCheck> = ArrayList()
 
@@ -93,6 +95,7 @@ class ClassListFragment : Fragment() {
 
         override fun doInBackground(vararg sectionIds: Int?): JSONArray {
             classList.clear()
+            classTitleList.clear()
             val jwt = preferences.getString("jwt", "")
             val sectionId = sectionIds[0]
             val url = "$SECTIONS_URL/$sectionId/classes"
@@ -110,9 +113,10 @@ class ClassListFragment : Fragment() {
                 val universityClass = Gson().fromJson(objStr, Class::class.java)
                 Log.i(TAG, "Class: $universityClass")
                 classList.add(universityClass)
+                classTitleList.add("${getDateTime(universityClass.start)} - ${getDateTime(universityClass.end)}")
             }
 
-            var adapter = ArrayAdapter(activity, android.R.layout.simple_list_item_1, classList)
+            var adapter = ArrayAdapter(activity, android.R.layout.simple_list_item_1, classTitleList)
             classListView.adapter = adapter
 
             progressDialog.dismiss()
@@ -187,8 +191,23 @@ class ClassListFragment : Fragment() {
         }
 
         override fun onPostExecute(attendanceCheckList: ArrayList<AttendanceCheck>) {
-            // CREATING ALARM MANAGER SCHEDULES FOR ATTENDANCE CHECKS.
+            // ALARM MANAGER.
             alarmManager = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+            // CREATING ALARM MANAGER SCHEDULES FOR STARTING CLASS NOTIFICATION.
+            val sectionCourseTitle = preferences.getString(SECTION_COURSE_TITLE, "")
+            Log.i(TAG, "Section course title $sectionCourseTitle")
+            for (c in classList) {
+                val intent = Intent(activity, StartingClassNotifier::class.java)
+                intent.putExtra("startingClassTitle", sectionCourseTitle)
+                val alarmId = Random().nextInt(1000000)
+                val pendingIntent = PendingIntent.getBroadcast(activity, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val five_mins_before_start = c.start - 5000
+                alarmManager.setExact(AlarmManager.RTC, five_mins_before_start, pendingIntent)
+                Log.i(TAG, "Scheduled Starting Class Alarm at ${getDateTime(five_mins_before_start)}")
+            }
+
+            // CREATING ALARM MANAGER SCHEDULES FOR ATTENDANCE CHECKS.
             for (attendanceCheck in attendanceCheckList) {
                 val intent = Intent(activity, BeaconScanner::class.java)
                 intent.putExtra("attendanceId", attendanceCheck.attendanceId)
