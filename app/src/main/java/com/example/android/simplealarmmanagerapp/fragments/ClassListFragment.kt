@@ -202,7 +202,7 @@ class ClassListFragment : Fragment() {
                 intent.putExtra("startingClassTitle", sectionCourseTitle)
                 val alarmId = Random().nextInt(1000000)
                 val pendingIntent = PendingIntent.getBroadcast(activity, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-                val five_mins_before_start = c.start - 5000
+                val five_mins_before_start = c.start - 2000 * 60
                 alarmManager.setExact(AlarmManager.RTC, five_mins_before_start, pendingIntent)
                 Log.i(TAG, "Scheduled Starting Class Alarm at ${getDateTime(five_mins_before_start)}")
             }
