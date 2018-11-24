@@ -171,11 +171,6 @@ class BluetoothService : Service() {
                 Log.i(TAG, "Attendance Reporter Error Content: ${response.content}")
                 Log.i(TAG, "Attendance Reporter Error Raw: ${response.raw}")
             }
-
-//            val wifiManager = applicationContext?.getSystemService(Context.WIFI_SERVICE) as WifiManager
-//            while (wifiManager.isWifiEnabled) {
-//                wifiManager.isWifiEnabled = false
-//            }
         }
     }
 }

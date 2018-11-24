@@ -26,6 +26,7 @@
 
         <receiver android:name=".BeaconScanner" />
         <receiver android:name=".StartingClassNotifier" />
+        <receiver android:name=".DisableWifi" />
 
         <service
             android:name=".BluetoothService"

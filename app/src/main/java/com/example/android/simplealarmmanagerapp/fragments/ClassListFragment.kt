@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
 import com.example.android.simplealarmmanagerapp.BeaconScanner
+import com.example.android.simplealarmmanagerapp.DisableWifi
 import com.example.android.simplealarmmanagerapp.R
 import com.example.android.simplealarmmanagerapp.StartingClassNotifier
 import com.example.android.simplealarmmanagerapp.constants.*
@@ -221,7 +222,7 @@ class ClassListFragment : Fragment() {
             // ALARM MANAGER.
             alarmManager = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-            // CREATING ALARM MANAGER SCHEDULES FOR STARTING CLASS NOTIFICATION.
+            // CREATING ALARM MANAGER SCHEDULES FOR STARTING CLASS NOTIFICATION AND TURNING ON WIFI.
             val sectionCourseTitle = preferences.getString(SECTION_COURSE_TITLE, "")
             Log.i(TAG, "Section course title $sectionCourseTitle")
             for (c in classList) {
@@ -245,6 +246,17 @@ class ClassListFragment : Fragment() {
                 alarmManager.setExact(AlarmManager.RTC, attendanceCheck.timestamp, pendingIntent)
                 Log.i(TAG, "Scheduled Alarm at ${getDateTime(attendanceCheck.timestamp)}")
             }
+
+            // CREATING ALARM MANAGER SCHEDULES FOR TURNING OFF WIFI.
+            for (c in classList) {
+                val intent = Intent(activity, DisableWifi::class.java)
+                val alarmId = Random().nextInt(1000000)
+                val pendingIntent = PendingIntent.getBroadcast(activity, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val endTime = c.end
+                alarmManager.setExact(AlarmManager.RTC, endTime, pendingIntent)
+                Log.i(TAG, "Scheduled Starting Class Alarm at ${getDateTime(endTime)}")
+            }
+
             progressDialog.dismiss()
         }
     }
