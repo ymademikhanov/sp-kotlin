@@ -209,7 +209,9 @@ class ClassListFragment : Fragment() {
                     val objStr = obj.toString()
                     val attendanceCheck = Gson().fromJson(objStr, AttendanceCheck::class.java)
                     Log.i(TAG, "Attendance check: $attendanceCheck")
-                    attendanceCheckList.add(attendanceCheck)
+                    if (attendanceCheck.timestamp > System.currentTimeMillis()) {
+                        attendanceCheckList.add(attendanceCheck)
+                    }
                 }
             }
             return attendanceCheckList
