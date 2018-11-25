@@ -28,6 +28,7 @@ import com.example.android.simplealarmmanagerapp.listview_models.ClassListViewMo
 import com.example.android.simplealarmmanagerapp.models.Attendance
 import com.example.android.simplealarmmanagerapp.models.AttendanceCheck
 import com.example.android.simplealarmmanagerapp.models.Class
+import com.example.android.simplealarmmanagerapp.utils.getDateTime
 import com.google.gson.Gson
 import org.json.JSONArray
 import java.sql.Timestamp
@@ -81,12 +82,6 @@ class ClassListFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         progressDialog.dismiss()
-    }
-
-    private fun getDateTime(t: Long): String {
-        val stamp = Timestamp(t)
-        val date = Date(stamp.getTime())
-        return date.toString()
     }
 
     inner class ClassListLoaderInBackground: AsyncTask<Int?, String, JSONArray>() {

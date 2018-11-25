@@ -13,3 +13,9 @@ const val SECTION_ID_EXTRA = "sectionIdExtra"
 const val TIME_TO_CLASS_ID = "timeToClassId"
 
 const val SECTION_COURSE_TITLE = "sectionCourseTitle"
+
+const val CLASS_NOTIFICATION_PREFIX = "classNotificationPrefix"
+
+const val ATTENDANCE_CHECK_ALARM_PREFIX = "attendanceCheckAlarmPrefix"
+
+const val WEEKLY_ATTENDANCE_CHECK_LOADER_PREFIX = "weeklyAttendanceCheckLoader"

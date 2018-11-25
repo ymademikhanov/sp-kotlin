@@ -1,5 +1,7 @@
 package com.example.android.simplealarmmanagerapp
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
@@ -14,15 +16,19 @@ import android.widget.Switch
 import android.widget.Toast
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
+import com.example.android.simplealarmmanagerapp.constants.ATTENDANCE_CHECK_ALARM_PREFIX
+import com.example.android.simplealarmmanagerapp.constants.WEEKLY_ATTENDANCE_CHECK_LOADER_PREFIX
 import com.example.android.simplealarmmanagerapp.form_creators.InstructorSignUpFormCreator
 import com.example.android.simplealarmmanagerapp.form_creators.SignInFormCreator
 import com.example.android.simplealarmmanagerapp.form_creators.StudentSignUpFormCreator
 import com.example.android.simplealarmmanagerapp.models.Account
 import com.example.android.simplealarmmanagerapp.models.Student
+import khronos.*
 import khttp.post
 import khttp.responses.Response
 
 import kotlinx.android.synthetic.main.activity_auth.*
+import java.time.LocalDateTime
 
 enum class AuthenticationMode {
     SIGNIN, STUDENT_REGISTRATION, INSTRUCTOR_REGISTRATION
@@ -42,6 +48,7 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
     lateinit var studentSignUpFormCreator: StudentSignUpFormCreator
     lateinit var authenticationMode: AuthenticationMode
     lateinit var progressDialog: ProgressDialog
+    lateinit var alarmManager : AlarmManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -161,6 +168,9 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
                 Log.i(TAG, "Successful sign-in")
                 val jwtToken = r.headers["X-Auth"].toString()
                 extractAccountTypeAndIDFromJWT(jwtToken)
+
+                scheduleWeeklyLoadingOfAttendanceChecks()
+
                 val navigateToMainPage = Intent(context, HomeActivity::class.java)
                 startActivity(navigateToMainPage)
             } else {
@@ -174,6 +184,31 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
                 removeUserFromDevice()
             }
             progressDialog.dismiss()
+        }
+    }
+
+    fun scheduleWeeklyLoadingOfAttendanceChecks() {
+        alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        Log.i(TAG, "Setting weekly attendance checks scheduling...")
+        val accountType = preferences.getString("accountType", "")
+        if (accountType == "student") {
+            val accountId = preferences.getInt("accountId", 0)
+
+            // SETTING REPEATED ATTENDANCE CHECK LOADING ON EVERY SUNDAY.
+            val today = Dates.today
+            var thisSunday = today.with(weekday = 1)
+            thisSunday = thisSunday.beginningOfHour.beginningOfMinute
+
+            for (i in 0..15) {
+                val intent = Intent(context, WeeklySchedulerOfBTChecks::class.java)
+                val alarmId = "$WEEKLY_ATTENDANCE_CHECK_LOADER_PREFIX:$accountId"
+                val alarmIdHashCode = alarmId.hashCode()
+                val pendingIntent = PendingIntent.getBroadcast(context, alarmIdHashCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                alarmManager.setExact(AlarmManager.RTC, thisSunday.time, pendingIntent)
+                Log.i(TAG, "Scheduled an attendance checks loading on $thisSunday")
+                thisSunday += 1.week
+            }
         }
     }
 
@@ -199,6 +234,9 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
                 Log.i(TAG, "Successful student sign up.")
                 val jwt = r.headers["X-Auth"].toString()
                 extractAccountTypeAndIDFromJWT(jwt)
+
+                scheduleWeeklyLoadingOfAttendanceChecks()
+
                 val navigateToMainPage = Intent(context, CourseListActivity::class.java)
                 startActivity(navigateToMainPage)
             } else {

@@ -1,27 +1,16 @@
-package com.example.android.simplealarmmanagerapp.fragments
+package com.example.android.simplealarmmanagerapp
 
 import android.app.AlarmManager
-import android.app.Fragment
+import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.ProgressDialog
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.ConnectivityManager
+import android.net.wifi.WifiManager
 import android.os.AsyncTask
-import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ListView
-import android.widget.Toast
-import com.example.android.simplealarmmanagerapp.BeaconScanner
-import com.example.android.simplealarmmanagerapp.DisableWifi
-import com.example.android.simplealarmmanagerapp.R
-import com.example.android.simplealarmmanagerapp.StartingClassNotifier
 import com.example.android.simplealarmmanagerapp.constants.*
 import com.example.android.simplealarmmanagerapp.models.Attendance
 import com.example.android.simplealarmmanagerapp.models.AttendanceCheck
@@ -29,132 +18,69 @@ import com.example.android.simplealarmmanagerapp.models.Class
 import com.example.android.simplealarmmanagerapp.models.Section
 import com.example.android.simplealarmmanagerapp.utils.getDateTime
 import com.google.gson.Gson
-import org.json.JSONArray
 import java.sql.Timestamp
 import java.util.*
-import kotlin.collections.ArrayList
 
-class SectionListFragment : Fragment() {
-    val TAG = "SectionListFragment"
+class WeeklySchedulerOfBTChecks : BroadcastReceiver() {
+    val TAG = "WeeklyScheduler"
 
+    private var classList: ArrayList<Class> = ArrayList()
     private var sectionList: ArrayList<Section> = ArrayList()
-    private var sectionTitleList: ArrayList<String> = ArrayList()
-
-    lateinit var preferences: SharedPreferences
-    lateinit var fragmentView: View
-    lateinit var sectionListView : ListView
-    lateinit var progressDialog: ProgressDialog
-    lateinit var scheduleBTAutoChecksButton: Button
-
-    var classList: ArrayList<Class> = ArrayList()
     private var attendanceList: ArrayList<Attendance> = ArrayList()
     private var attendanceCheckList: ArrayList<AttendanceCheck> = ArrayList()
 
+    lateinit var preferences: SharedPreferences
     lateinit var alarmManager : AlarmManager
+    lateinit var mContext: Context
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        fragmentView = inflater.inflate(R.layout.section_list_layout, container, false)
-        return fragmentView
-    }
+    override fun onReceive(context: Context?, intent: Intent?) {
+        Log.i(TAG, "onReceive()")
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        mContext = context!!
 
-        progressDialog = ProgressDialog(activity)
+        // Enabling WiFi.
+        val wifiManager = context?.applicationContext?.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        wifiManager.isWifiEnabled = true
+        Log.i(TAG, "Enabled WiFi: ${wifiManager.isWifiEnabled}")
 
-        scheduleBTAutoChecksButton = view.findViewById(R.id.schedule_bt_auto_checks_btn)
-        scheduleBTAutoChecksButton.setOnClickListener(object: View.OnClickListener{
-            override fun onClick(v: View?) {
-                Log.i(TAG, "Scheduling attendance checks")
-                if (verifyAvailableNetwork()) {
-                    LoadAndScheduleAttendanceInBackground().execute(sectionList)
-                } else {
-                    Toast.makeText(activity.applicationContext, "No internet connectivity =(", Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
+        // Starting notification.
+        val builder = Notification.Builder(context)
+                .setContentTitle("Attendance checks")
+                .setContentText("Loading attendance checks for the next week")
+                .setSmallIcon(R.drawable.notification_icon_background)
 
-        sectionListView = view.findViewById(R.id.section_list_view)
-        sectionListView.setOnItemClickListener { _, _, position, _ ->
-            val editor = preferences.edit()
-            editor.putInt(SECTION_ID_EXTRA, sectionList[position].id!!)
-            editor.putString(SECTION_COURSE_TITLE, sectionList[position].course?.title)
-            editor.apply()
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(0, builder.build())
 
-            val fr = ClassListFragment()
-            val fragmentManager = fragmentManager
-            val transaction = fragmentManager.beginTransaction()
-            transaction.replace(R.id.content_frame, fr)
-            transaction.addToBackStack(null)
-            transaction.commit()
-        }
-
-        preferences = activity.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        preferences = context.applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
         val jwt = preferences.getString("jwt", "")
-        Log.i(TAG, "Started loading sections by jwt $jwt")
+        LoadAndScheduleAttendanceInBackground().execute(jwt)
+    }
 
-        if (verifyAvailableNetwork()) {
-            progressDialog.setMessage("Loading sections ...")
-            progressDialog.setCancelable(false)
-            progressDialog.show()
-            SectionListLoaderInBackground().execute(jwt)
-        } else {
-            Toast.makeText(activity.applicationContext, "No internet connectivity =(", Toast.LENGTH_SHORT).show()
+    inner class LoadAndScheduleAttendanceInBackground: AsyncTask<String, String, ArrayList<AttendanceCheck>>() {
+        override fun onPreExecute() {
+            super.onPreExecute()
+            classList.clear()
         }
-    }
 
-    fun verifyAvailableNetwork() : Boolean {
-        val connectivityManager = activity.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkInfo = connectivityManager.activeNetworkInfo
-        return networkInfo != null && networkInfo.isConnected
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        progressDialog.dismiss()
-    }
-
-    inner class SectionListLoaderInBackground: AsyncTask<String, String, JSONArray>() {
-        override fun doInBackground(vararg jwts: String): JSONArray {
-            sectionTitleList.clear()
-            sectionList.clear()
+        override fun doInBackground(vararg jwts: String): ArrayList<AttendanceCheck> {
+            // LOADING COURSE SECTIONS FOR STUDENT.
             val jwt = jwts[0]
             val response = khttp.get(MY_SECTION_URL, headers=mapOf("x-auth" to jwt))
-            Log.i(TAG, "Response: ${response.jsonArray}")
-            return response.jsonArray
-        }
+            Log.i(TAG, "Response for loading sections: ${response.jsonArray}")
 
-        override fun onPostExecute(sections: JSONArray) {
+            val sections = response.jsonArray
             for (i in 0..(sections.length() - 1)) {
                 val obj = sections.getJSONObject(i)
                 val objectJSONString = obj.toString()
                 val section = Gson().fromJson(objectJSONString, Section::class.java)
-                Log.i(TAG, "Object JSON: $objectJSONString")
+                Log.i(TAG, "Object JSON of section: $objectJSONString")
                 Log.i(TAG, "Section: $section")
                 sectionList.add(section)
-                sectionTitleList.add(section.course!!.title)
             }
-            var adapter = ArrayAdapter(activity, android.R.layout.simple_list_item_1, sectionTitleList)
-            sectionListView.adapter = adapter
-            progressDialog.dismiss()
-        }
-    }
-
-    inner class LoadAndScheduleAttendanceInBackground: AsyncTask<ArrayList<Section>, String, ArrayList<AttendanceCheck>>() {
-        override fun onPreExecute() {
-            super.onPreExecute()
-            classList.clear()
-            progressDialog.setMessage("Loading attendances ...")
-            progressDialog.setCancelable(false)
-            progressDialog.show()
-        }
-
-        override fun doInBackground(vararg sections_vars: ArrayList<Section>?): ArrayList<AttendanceCheck> {
-            val jwt = preferences.getString("jwt", "")
-            val sections = sections_vars[0]
 
             // LOADING COURSE SECTION CLASSES FOR STUDENT.
-            for (section in sections!!) {
+            for (section in sectionList) {
                 val sectionId = section.id
                 val url = "$SECTIONS_URL/$sectionId/classes"
                 Log.i(TAG, "Url: $url")
@@ -214,17 +140,17 @@ class SectionListFragment : Fragment() {
 
         override fun onPostExecute(attendanceCheckList: ArrayList<AttendanceCheck>) {
             // ALARM MANAGER.
-            alarmManager = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager = mContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
             // CREATING ALARM MANAGER SCHEDULES FOR STARTING CLASS NOTIFICATION AND TURNING ON WIFI.
             val sectionCourseTitle = preferences.getString(SECTION_COURSE_TITLE, "")
             Log.i(TAG, "Section course title $sectionCourseTitle")
             for (c in classList) {
-                val intent = Intent(activity, StartingClassNotifier::class.java)
+                val intent = Intent(mContext, StartingClassNotifier::class.java)
                 intent.putExtra("startingClassTitle", sectionCourseTitle)
                 val alarmId = "$CLASS_NOTIFICATION_PREFIX:${c.sectionId}:${c.id}"
                 val alarmIdHashcode = alarmId.hashCode()
-                val pendingIntent = PendingIntent.getBroadcast(activity, alarmIdHashcode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingIntent = PendingIntent.getBroadcast(mContext, alarmIdHashcode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
                 val fiveMinBeforeStart = c.start - 2000 * 60
                 alarmManager.setExact(AlarmManager.RTC, fiveMinBeforeStart, pendingIntent)
                 Log.i(TAG, "Scheduled Starting Class Alarm at ${getDateTime(fiveMinBeforeStart)}")
@@ -232,12 +158,12 @@ class SectionListFragment : Fragment() {
 
             // CREATING ALARM MANAGER SCHEDULES FOR ATTENDANCE CHECKS.
             for (attendanceCheck in attendanceCheckList) {
-                val intent = Intent(activity, BeaconScanner::class.java)
+                val intent = Intent(mContext, BeaconScanner::class.java)
                 intent.putExtra("attendanceId", attendanceCheck.attendanceId)
                 intent.putExtra("attendanceCheckId", attendanceCheck.id)
                 val alarmId = "$ATTENDANCE_CHECK_ALARM_PREFIX:${attendanceCheck.attendanceId}:${attendanceCheck.id}"
                 val alarmIdHashCode = alarmId.hashCode()
-                val pendingIntent = PendingIntent.getBroadcast(activity, alarmIdHashCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingIntent = PendingIntent.getBroadcast(mContext, alarmIdHashCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
                 alarmManager.setExact(AlarmManager.RTC, attendanceCheck.timestamp, pendingIntent)
                 Log.i(TAG, "Scheduled Alarm at ${getDateTime(attendanceCheck.timestamp)}")
@@ -245,15 +171,25 @@ class SectionListFragment : Fragment() {
 
             // CREATING ALARM MANAGER SCHEDULES FOR TURNING OFF WIFI.
             for (c in classList) {
-                val intent = Intent(activity, DisableWifi::class.java)
+                val intent = Intent(mContext, DisableWifi::class.java)
                 val alarmId = Random().nextInt(1000000)
-                val pendingIntent = PendingIntent.getBroadcast(activity, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingIntent = PendingIntent.getBroadcast(mContext, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
                 val endTime = c.end
                 alarmManager.setExact(AlarmManager.RTC, endTime, pendingIntent)
                 Log.i(TAG, "Scheduled Starting Class Alarm at ${getDateTime(endTime)}")
             }
 
-            progressDialog.dismiss()
+            val wifiManager = mContext?.applicationContext?.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            wifiManager.isWifiEnabled = false
+            Log.i(TAG, "Disabled WiFi: ${wifiManager.isWifiEnabled}")
+
+            val builder = Notification.Builder(mContext)
+                    .setContentTitle("Attendance checks")
+                    .setContentText("Successfully scheduled attendance checks for the next week")
+                    .setSmallIcon(R.drawable.notification_icon_background)
+
+            val notificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.notify(0, builder.build())
         }
     }
 }
