@@ -17,7 +17,9 @@ class StartingClassNotifier : BroadcastReceiver() {
 
         // Enabling WiFi.
         val wifiManager = context?.applicationContext?.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        wifiManager.isWifiEnabled = true
+        while (!wifiManager.isWifiEnabled) {
+            wifiManager.isWifiEnabled = true
+        }
         Log.i(TAG, "Enabled WiFi: ${wifiManager.isWifiEnabled}")
 
 

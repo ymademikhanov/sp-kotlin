@@ -40,7 +40,9 @@ class WeeklySchedulerOfBTChecks : BroadcastReceiver() {
 
         // Enabling WiFi.
         val wifiManager = context?.applicationContext?.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        wifiManager.isWifiEnabled = true
+        while (!wifiManager.isWifiEnabled) {
+            wifiManager.isWifiEnabled = true
+        }
         Log.i(TAG, "Enabled WiFi: ${wifiManager.isWifiEnabled}")
 
         // Starting notification.
@@ -150,7 +152,7 @@ class WeeklySchedulerOfBTChecks : BroadcastReceiver() {
                 intent.putExtra("startingClassTitle", sectionCourseTitle)
                 val alarmId = "$CLASS_NOTIFICATION_PREFIX:${c.sectionId}:${c.id}"
                 val alarmIdHashcode = alarmId.hashCode()
-                val pendingIntent = PendingIntent.getBroadcast(mContext, alarmIdHashcode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingIntent = PendingIntent.getBroadcast(mContext, alarmIdHashcode, intent, PendingIntent.FLAG_CANCEL_CURRENT)
                 val fiveMinBeforeStart = c.start - 2000 * 60
                 alarmManager.setExact(AlarmManager.RTC, fiveMinBeforeStart, pendingIntent)
                 Log.i(TAG, "Scheduled Starting Class Alarm at ${getDateTime(fiveMinBeforeStart)}")
@@ -163,7 +165,7 @@ class WeeklySchedulerOfBTChecks : BroadcastReceiver() {
                 intent.putExtra("attendanceCheckId", attendanceCheck.id)
                 val alarmId = "$ATTENDANCE_CHECK_ALARM_PREFIX:${attendanceCheck.attendanceId}:${attendanceCheck.id}"
                 val alarmIdHashCode = alarmId.hashCode()
-                val pendingIntent = PendingIntent.getBroadcast(mContext, alarmIdHashCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingIntent = PendingIntent.getBroadcast(mContext, alarmIdHashCode, intent, PendingIntent.FLAG_CANCEL_CURRENT)
 
                 alarmManager.setExact(AlarmManager.RTC, attendanceCheck.timestamp, pendingIntent)
                 Log.i(TAG, "Scheduled Alarm at ${getDateTime(attendanceCheck.timestamp)}")
@@ -173,7 +175,7 @@ class WeeklySchedulerOfBTChecks : BroadcastReceiver() {
             for (c in classList) {
                 val intent = Intent(mContext, DisableWifi::class.java)
                 val alarmId = Random().nextInt(1000000)
-                val pendingIntent = PendingIntent.getBroadcast(mContext, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingIntent = PendingIntent.getBroadcast(mContext, alarmId, intent, PendingIntent.FLAG_CANCEL_CURRENT)
                 val endTime = c.end
                 alarmManager.setExact(AlarmManager.RTC, endTime, pendingIntent)
                 Log.i(TAG, "Scheduled Starting Class Alarm at ${getDateTime(endTime)}")

@@ -224,7 +224,7 @@ class SectionListFragment : Fragment() {
                 intent.putExtra("startingClassTitle", sectionCourseTitle)
                 val alarmId = "$CLASS_NOTIFICATION_PREFIX:${c.sectionId}:${c.id}"
                 val alarmIdHashcode = alarmId.hashCode()
-                val pendingIntent = PendingIntent.getBroadcast(activity, alarmIdHashcode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingIntent = PendingIntent.getBroadcast(activity, alarmIdHashcode, intent, PendingIntent.FLAG_CANCEL_CURRENT)
                 val fiveMinBeforeStart = c.start - 2000 * 60
                 alarmManager.setExact(AlarmManager.RTC, fiveMinBeforeStart, pendingIntent)
                 Log.i(TAG, "Scheduled Starting Class Alarm at ${getDateTime(fiveMinBeforeStart)}")
@@ -237,7 +237,7 @@ class SectionListFragment : Fragment() {
                 intent.putExtra("attendanceCheckId", attendanceCheck.id)
                 val alarmId = "$ATTENDANCE_CHECK_ALARM_PREFIX:${attendanceCheck.attendanceId}:${attendanceCheck.id}"
                 val alarmIdHashCode = alarmId.hashCode()
-                val pendingIntent = PendingIntent.getBroadcast(activity, alarmIdHashCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingIntent = PendingIntent.getBroadcast(activity, alarmIdHashCode, intent, PendingIntent.FLAG_CANCEL_CURRENT)
 
                 alarmManager.setExact(AlarmManager.RTC, attendanceCheck.timestamp, pendingIntent)
                 Log.i(TAG, "Scheduled Alarm at ${getDateTime(attendanceCheck.timestamp)}")
@@ -247,7 +247,7 @@ class SectionListFragment : Fragment() {
             for (c in classList) {
                 val intent = Intent(activity, DisableWifi::class.java)
                 val alarmId = Random().nextInt(1000000)
-                val pendingIntent = PendingIntent.getBroadcast(activity, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingIntent = PendingIntent.getBroadcast(activity, alarmId, intent, PendingIntent.FLAG_CANCEL_CURRENT)
                 val endTime = c.end
                 alarmManager.setExact(AlarmManager.RTC, endTime, pendingIntent)
                 Log.i(TAG, "Scheduled Starting Class Alarm at ${getDateTime(endTime)}")

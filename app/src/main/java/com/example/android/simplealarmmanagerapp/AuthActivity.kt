@@ -198,15 +198,17 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
             // SETTING REPEATED ATTENDANCE CHECK LOADING ON EVERY SUNDAY.
             val today = Dates.today
             var thisSunday = today.with(weekday = 1)
-            thisSunday = thisSunday.beginningOfHour.beginningOfMinute
+            thisSunday = thisSunday.beginningOfHour
 
             for (i in 0..15) {
-                val intent = Intent(context, WeeklySchedulerOfBTChecks::class.java)
-                val alarmId = "$WEEKLY_ATTENDANCE_CHECK_LOADER_PREFIX:$accountId:$i"
-                val alarmIdHashCode = alarmId.hashCode()
-                val pendingIntent = PendingIntent.getBroadcast(context, alarmIdHashCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-                alarmManager.setExact(AlarmManager.RTC, thisSunday.time, pendingIntent)
-                Log.i(TAG, "Scheduled an attendance checks loading on $thisSunday")
+                if (thisSunday.time > System.currentTimeMillis() - 24 * 60 * 60 * 1000) {
+                    val intent = Intent(context, WeeklySchedulerOfBTChecks::class.java)
+                    val alarmId = "$WEEKLY_ATTENDANCE_CHECK_LOADER_PREFIX:$accountId:$i"
+                    val alarmIdHashCode = alarmId.hashCode()
+                    val pendingIntent = PendingIntent.getBroadcast(context, alarmIdHashCode, intent, PendingIntent.FLAG_CANCEL_CURRENT)
+                    alarmManager.setExact(AlarmManager.RTC, thisSunday.time, pendingIntent)
+                    Log.i(TAG, "Scheduled an attendance checks loading on $thisSunday")
+                }
                 thisSunday += 1.week
             }
         }
