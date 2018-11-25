@@ -202,7 +202,7 @@ class AuthActivity : AppCompatActivity(), View.OnClickListener {
 
             for (i in 0..15) {
                 val intent = Intent(context, WeeklySchedulerOfBTChecks::class.java)
-                val alarmId = "$WEEKLY_ATTENDANCE_CHECK_LOADER_PREFIX:$accountId"
+                val alarmId = "$WEEKLY_ATTENDANCE_CHECK_LOADER_PREFIX:$accountId:$i"
                 val alarmIdHashCode = alarmId.hashCode()
                 val pendingIntent = PendingIntent.getBroadcast(context, alarmIdHashCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
                 alarmManager.setExact(AlarmManager.RTC, thisSunday.time, pendingIntent)
