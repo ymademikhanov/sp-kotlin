@@ -12,12 +12,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".AuthActivity">
 
-    <Button
-        android:id="@+id/schedule_bt_auto_checks_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Schedule BT auto-checks!"/>
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="fill_parent">

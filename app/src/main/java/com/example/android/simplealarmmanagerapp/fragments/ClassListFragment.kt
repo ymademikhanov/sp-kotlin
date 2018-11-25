@@ -7,6 +7,7 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
@@ -16,6 +17,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
+import android.widget.Toast
 import com.example.android.simplealarmmanagerapp.BeaconScanner
 import com.example.android.simplealarmmanagerapp.DisableWifi
 import com.example.android.simplealarmmanagerapp.R
@@ -39,15 +41,11 @@ class ClassListFragment : Fragment() {
     private lateinit var preferencesTimeToClass: SharedPreferences
     private var classList: ArrayList<Class> = ArrayList()
     private var classTitleList: ArrayList<String> = ArrayList()
-    private var attendanceList: ArrayList<Attendance> = ArrayList()
     private var classListViewItems: ArrayList<ClassListViewModel> = ArrayList()
-    private var attendanceCheckList: ArrayList<AttendanceCheck> = ArrayList()
 
     lateinit var fragmentView: View
-    lateinit var alarmManager : AlarmManager
     lateinit var classListView : ListView
     lateinit var progressDialog: ProgressDialog
-    lateinit var scheduleBTAutoChecksButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         fragmentView = inflater.inflate(R.layout.activity_class_list, container, false)
@@ -67,16 +65,18 @@ class ClassListFragment : Fragment() {
 
         classListView = view.findViewById(R.id.class_list_view)
 
-        scheduleBTAutoChecksButton = view.findViewById(R.id.schedule_bt_auto_checks_btn)
-        scheduleBTAutoChecksButton.setOnClickListener(object: View.OnClickListener{
-            override fun onClick(v: View?) {
-                Log.i(TAG, "Scheduling attendance checks")
-                LoadAndScheduleAttendanceInBackground().execute(sectionId)
-            }
-        })
-        ClassListLoaderInBackground().execute(sectionId)
+        if (verifyAvailableNetwork()) {
+            ClassListLoaderInBackground().execute(sectionId)
+        } else {
+            Toast.makeText(activity.applicationContext, "No internet connectivity =(", Toast.LENGTH_SHORT).show()
+        }
     }
 
+    fun verifyAvailableNetwork() : Boolean {
+        val connectivityManager = activity.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo = connectivityManager.activeNetworkInfo
+        return networkInfo != null && networkInfo.isConnected
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -145,118 +145,6 @@ class ClassListFragment : Fragment() {
         override fun onPostExecute(classes: JSONArray) {
             var classListAdapter = ClassListViewAdapter(activity, R.layout.class_list_view_row, classListViewItems)
             classListView.adapter = classListAdapter
-            progressDialog.dismiss()
-        }
-    }
-
-    inner class LoadAndScheduleAttendanceInBackground: AsyncTask<Int?, String, ArrayList<AttendanceCheck>>() {
-        override fun onPreExecute() {
-            super.onPreExecute()
-            progressDialog.setMessage("Loading attendances ...")
-            progressDialog.setCancelable(false)
-            progressDialog.show()
-        }
-
-        override fun doInBackground(vararg sectionIds: Int?): ArrayList<AttendanceCheck> {
-            classList.clear()
-            val jwt = preferences.getString("jwt", "")
-            val sectionId = sectionIds[0]
-            val url = "$SECTIONS_URL/$sectionId/classes"
-
-            Log.i(TAG, "Url: $url")
-
-            val response = khttp.get(url, headers=mapOf("x-auth" to jwt))
-
-            Log.i(TAG, "Response: $response")
-            Log.i(TAG, "Response: ${response.jsonArray}")
-
-            val classesJSONArray = response.jsonArray
-            for (i in 0..(classesJSONArray.length() - 1)) {
-                val obj = classesJSONArray.getJSONObject(i)
-                val objStr = obj.toString()
-                val universityClass = Gson().fromJson(objStr, Class::class.java)
-                Log.i(TAG, "Class: $universityClass")
-                classList.add(universityClass)
-            }
-
-            for (c in classList) {
-                // LOADING ATTENDANCES FOR STUDENT.
-                val url = "$CLASSES_URL/${c.id}/attendances"
-                Log.i(TAG, "Requesting url: $url")
-                val response = khttp.get(url, headers = mapOf("x-auth" to jwt))
-                Log.i(TAG, "Response: $response")
-                Log.i(TAG, "Response JSON array: ${response.jsonArray}")
-
-                val attendancesJSONArray = response.jsonArray
-                for (i in 0..(attendancesJSONArray.length() - 1)) {
-                    val obj = attendancesJSONArray.getJSONObject(i)
-                    val objStr = obj.toString()
-                    val attendance = Gson().fromJson(objStr, Attendance::class.java)
-                    Log.i(TAG, "Attendance: $attendance")
-                    attendanceList.add(attendance)
-                }
-            }
-            // LOADING ATTENDANCE CHECKS FOR STUDENT.
-            for (attendance in attendanceList) {
-                val url = "$ATTENDANCE_URL/${attendance.id}/checks"
-                Log.i(TAG, "Requesting url: $url")
-                val response = khttp.get(url, headers = mapOf("x-auth" to jwt))
-                Log.i(TAG, "Response: $response")
-                Log.i(TAG, "Response JSON array: ${response.jsonArray}")
-
-                val attendanceChecksJSONArray = response.jsonArray
-                for (i in 0..(attendanceChecksJSONArray.length() - 1)) {
-                    val obj = attendanceChecksJSONArray.getJSONObject(i)
-                    val objStr = obj.toString()
-                    val attendanceCheck = Gson().fromJson(objStr, AttendanceCheck::class.java)
-                    Log.i(TAG, "Attendance check: $attendanceCheck")
-                    if (attendanceCheck.timestamp > System.currentTimeMillis()) {
-                        attendanceCheckList.add(attendanceCheck)
-                    }
-                }
-            }
-            return attendanceCheckList
-        }
-
-        override fun onPostExecute(attendanceCheckList: ArrayList<AttendanceCheck>) {
-            // ALARM MANAGER.
-            alarmManager = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-            // CREATING ALARM MANAGER SCHEDULES FOR STARTING CLASS NOTIFICATION AND TURNING ON WIFI.
-            val sectionCourseTitle = preferences.getString(SECTION_COURSE_TITLE, "")
-            Log.i(TAG, "Section course title $sectionCourseTitle")
-            for (c in classList) {
-                val intent = Intent(activity, StartingClassNotifier::class.java)
-                intent.putExtra("startingClassTitle", sectionCourseTitle)
-                val alarmId = Random().nextInt(1000000)
-                val pendingIntent = PendingIntent.getBroadcast(activity, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-                val five_mins_before_start = c.start - 2000 * 60
-                alarmManager.setExact(AlarmManager.RTC, five_mins_before_start, pendingIntent)
-                Log.i(TAG, "Scheduled Starting Class Alarm at ${getDateTime(five_mins_before_start)}")
-            }
-
-            // CREATING ALARM MANAGER SCHEDULES FOR ATTENDANCE CHECKS.
-            for (attendanceCheck in attendanceCheckList) {
-                val intent = Intent(activity, BeaconScanner::class.java)
-                intent.putExtra("attendanceId", attendanceCheck.attendanceId)
-                intent.putExtra("attendanceCheckId", attendanceCheck.id)
-                val alarmId = Random().nextInt(1000000)
-                val pendingIntent = PendingIntent.getBroadcast(activity, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-                alarmManager.setExact(AlarmManager.RTC, attendanceCheck.timestamp, pendingIntent)
-                Log.i(TAG, "Scheduled Alarm at ${getDateTime(attendanceCheck.timestamp)}")
-            }
-
-            // CREATING ALARM MANAGER SCHEDULES FOR TURNING OFF WIFI.
-            for (c in classList) {
-                val intent = Intent(activity, DisableWifi::class.java)
-                val alarmId = Random().nextInt(1000000)
-                val pendingIntent = PendingIntent.getBroadcast(activity, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-                val endTime = c.end
-                alarmManager.setExact(AlarmManager.RTC, endTime, pendingIntent)
-                Log.i(TAG, "Scheduled Starting Class Alarm at ${getDateTime(endTime)}")
-            }
-
             progressDialog.dismiss()
         }
     }

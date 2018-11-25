@@ -3,6 +3,13 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <Button
+        android:id="@+id/schedule_bt_auto_checks_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Schedule BT auto-checks!"/>
+
     <ListView
         android:id="@+id/section_list_view"
         android:layout_width="match_parent"
