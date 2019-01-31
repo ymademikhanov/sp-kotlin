@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.android.simplealarmmanagerapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -21,31 +22,41 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".CourseListActivity" />
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".activities.CourseListActivity" />
 
-        <receiver android:name=".BeaconScanner" />
-        <receiver android:name=".StartingClassNotifier" />
-        <receiver android:name=".DisableWifi" />
+        <receiver android:name=".receivers.AttendanceCheckBR" />
+        <receiver android:name=".receivers.NotifyNextClassBR" />
+        <receiver android:name=".receivers.DisableNetworkBR" />
 
         <service
-            android:name=".BluetoothService"
+            android:name=".services.AttendanceCheckService"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".AuthActivity"
+            android:name=".activities.AuthActivity"
             android:label="@string/title_activity_auth">
+
+        </activity>
+        <activity
+            android:name=".activities.HomeActivity"
+            android:label="@string/title_activity_home"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".activities.YetAnotherAuthActivity"
+            android:label="@string/title_activity_home"
+            android:theme="@style/AppTheme.NoActionBar">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".HomeActivity"
-            android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme.NoActionBar" />
+
     </application>
 
 </manifest>

@@ -6,9 +6,6 @@ import android.text.method.PasswordTransformationMethod
 import android.widget.EditText
 import android.widget.LinearLayout
 
-enum class FormFieldType {
-    EMAIL, PASSWORD, NAME, TEXT, NUMBER
-}
 
 class FormField {
     var editText: EditText

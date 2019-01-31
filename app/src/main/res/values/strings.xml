@@ -24,4 +24,8 @@
     <string name="target_beacon_address">Enter Beacon address. Example: C0:34:D3:21:3D:E4</string>
     <string name="set_target_beacon_text">Set a target beacon.</string>
     <string name="save">Save</string>
+
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+
 </resources>

@@ -9,7 +9,6 @@ data class Class(val id: Int? = null,
                  val end: Long = 0,
                  @SerializedName("room_id") val roomId: Int? = null,
                  @SerializedName("checks") val checks: Int? = null,
-
                  val course: Course? = null,
                  val room: String? = null,
                  val beacon: Beacon? = null,

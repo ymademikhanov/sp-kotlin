@@ -13,16 +13,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
-import com.example.android.simplealarmmanagerapp.BeaconScanner
-import com.example.android.simplealarmmanagerapp.DisableWifi
+import com.example.android.simplealarmmanagerapp.receivers.AttendanceCheckBR
+import com.example.android.simplealarmmanagerapp.receivers.DisableNetworkBR
 import com.example.android.simplealarmmanagerapp.R
-import com.example.android.simplealarmmanagerapp.StartingClassNotifier
-import com.example.android.simplealarmmanagerapp.constants.*
-import com.example.android.simplealarmmanagerapp.listview_adapters.ClassListViewAdapter
-import com.example.android.simplealarmmanagerapp.listview_models.ClassListViewModel
+import com.example.android.simplealarmmanagerapp.receivers.NotifyNextClassBR
+import com.example.android.simplealarmmanagerapp.utilities.constants.*
+import com.example.android.simplealarmmanagerapp.adapters.ClassListViewAdapter
+import com.example.android.simplealarmmanagerapp.models.listview_models.ClassListViewModel
 import com.example.android.simplealarmmanagerapp.models.Attendance
 import com.example.android.simplealarmmanagerapp.models.AttendanceCheck
 import com.example.android.simplealarmmanagerapp.models.Class
@@ -59,11 +58,9 @@ class ClassListFragment : Fragment() {
         Log.i(TAG, "onCreate()")
 
         progressDialog = ProgressDialog(activity)
-        preferences = activity.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        preferences = activity.getSharedPreferences(BAC_PREFERENCES_NAME, Context.MODE_PRIVATE)
         val sectionId = preferences.getInt(SECTION_ID_EXTRA, 0)
         Log.i(TAG, "Section ID is $sectionId")
-
-        preferencesTimeToClass = activity.getSharedPreferences(TIME_TO_CLASS_ID, Context.MODE_PRIVATE)
 
         classListView = view.findViewById(R.id.class_list_view)
 
@@ -226,7 +223,7 @@ class ClassListFragment : Fragment() {
             val sectionCourseTitle = preferences.getString(SECTION_COURSE_TITLE, "")
             Log.i(TAG, "Section course title $sectionCourseTitle")
             for (c in classList) {
-                val intent = Intent(activity, StartingClassNotifier::class.java)
+                val intent = Intent(activity, NotifyNextClassBR::class.java)
                 intent.putExtra("startingClassTitle", sectionCourseTitle)
                 val alarmId = Random().nextInt(1000000)
                 val pendingIntent = PendingIntent.getBroadcast(activity, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
@@ -237,7 +234,7 @@ class ClassListFragment : Fragment() {
 
             // CREATING ALARM MANAGER SCHEDULES FOR ATTENDANCE CHECKS.
             for (attendanceCheck in attendanceCheckList) {
-                val intent = Intent(activity, BeaconScanner::class.java)
+                val intent = Intent(activity, AttendanceCheckBR::class.java)
                 intent.putExtra("attendanceId", attendanceCheck.attendanceId)
                 intent.putExtra("attendanceCheckId", attendanceCheck.id)
                 val alarmId = Random().nextInt(1000000)
@@ -249,7 +246,7 @@ class ClassListFragment : Fragment() {
 
             // CREATING ALARM MANAGER SCHEDULES FOR TURNING OFF WIFI.
             for (c in classList) {
-                val intent = Intent(activity, DisableWifi::class.java)
+                val intent = Intent(activity, DisableNetworkBR::class.java)
                 val alarmId = Random().nextInt(1000000)
                 val pendingIntent = PendingIntent.getBroadcast(activity, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
                 val endTime = c.end

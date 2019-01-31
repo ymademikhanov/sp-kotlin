@@ -1,13 +1,14 @@
-package com.example.android.simplealarmmanagerapp.form_creators
+package com.example.android.simplealarmmanagerapp.utilities.form_creators
 
 import android.content.Context
+import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import com.example.android.simplealarmmanagerapp.models.Account
 import com.example.android.simplealarmmanagerapp.models.FormField
 import com.example.android.simplealarmmanagerapp.models.FormFieldType
 
-class SignInFormCreator(var context: Context) {
+class SignInFormCreator(var context: Context, var listener: View.OnClickListener) {
     var TAG: String = "InstructorFormCreator"
     lateinit var layout: LinearLayout
     lateinit var emailField: FormField
@@ -22,6 +23,7 @@ class SignInFormCreator(var context: Context) {
 
         submitButton = Button(context)
         submitButton.text = "Login"
+        submitButton.setOnClickListener(listener)
 
         layout.addView(emailField.editText)
         layout.addView(passwordField.editText)
@@ -38,6 +40,6 @@ class SignInFormCreator(var context: Context) {
     }
 
     fun getAccount() : Account {
-        return Account(emailField.getText(), passwordField.getText())
+        return Account(emailField.getText(), passwordField.getText(), null, null)
     }
 }

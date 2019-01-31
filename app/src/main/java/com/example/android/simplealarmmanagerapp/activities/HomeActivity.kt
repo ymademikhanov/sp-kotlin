@@ -1,52 +1,60 @@
-package com.example.android.simplealarmmanagerapp
+package com.example.android.simplealarmmanagerapp.activities
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.design.widget.NavigationView
-import android.support.v4.view.GravityCompat
-import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ListView
-import com.example.android.simplealarmmanagerapp.constants.PREFERENCES_NAME
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
+import com.example.android.simplealarmmanagerapp.R
 import com.example.android.simplealarmmanagerapp.fragments.SectionListFragment
 import com.example.android.simplealarmmanagerapp.fragments.SetTargetBeaconFragment
+import com.example.android.simplealarmmanagerapp.utilities.constants.AUTH_PREFERENCE_NAME
+import com.example.android.simplealarmmanagerapp.utilities.preferences.removeUser
+import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.app_bar_home.*
 
 class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     val TAG = "HomeActivity"
 
-    lateinit var preferences: SharedPreferences
     lateinit var context: Context
+    lateinit var preferences: SharedPreferences
     lateinit var sectionList: ArrayList<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+        context = this
+
         setSupportActionBar(toolbar)
 
         val toggle = ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+                this,
+                drawer_layout,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close)
+
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
-        context = this
-        preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+
+        preferences = context.getSharedPreferences(AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE)
         sectionList = ArrayList()
     }
 
     override fun onBackPressed() {
         val fm = fragmentManager
         if (fm.backStackEntryCount > 0) {
-            Log.i("MainActivity", "popping backstack")
+            Log.i(TAG, "popping back stack")
             fm.popBackStack()
         } else {
-            Log.i("MainActivity", "nothing on backstack, calling super")
+            Log.i(TAG, "nothing on back stack, calling super")
             super.onBackPressed()
         }
     }
@@ -61,9 +69,9 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        when (item.itemId) {
-            R.id.action_settings -> return true
-            else -> return super.onOptionsItemSelected(item)
+        return when (item.itemId) {
+            R.id.action_settings -> true
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -71,23 +79,18 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fragmentManager = getFragmentManager()
         when (item.itemId) {
             R.id.nav_courses -> {
-                fragmentManager.beginTransaction().replace(R.id.content_frame, SectionListFragment()).commit()
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, SectionListFragment()).commit()
             }
             R.id.nav_attendance -> {
 
             }
             R.id.set_beacon_target -> {
-                fragmentManager.beginTransaction().replace(R.id.content_frame, SetTargetBeaconFragment()).commit()
+                fragmentManager.beginTransaction()
+                        .replace(R.id.content_frame, SetTargetBeaconFragment()).commit()
             }
             R.id.nav_sign_out -> {
-                val editor = preferences.edit()
-                editor.remove("email")
-                editor.remove("password")
-                editor.remove("signedIn")
-                editor.remove("jwt")
-                editor.apply()
-                finish()
-                Log.i(TAG, "User signed out!")
+                removeUser(preferences)
             }
         }
         drawer_layout.closeDrawer(GravityCompat.START)

@@ -1,26 +1,26 @@
-package com.example.android.simplealarmmanagerapp
+package com.example.android.simplealarmmanagerapp.activities
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.AsyncTask
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import androidx.appcompat.app.AppCompatActivity
+import com.example.android.simplealarmmanagerapp.R
+import com.example.android.simplealarmmanagerapp.utilities.constants.STUDENT_URL
 import khttp.get
 import org.json.JSONArray
 import kotlin.collections.ArrayList
 
 class CourseListActivity : AppCompatActivity() {
     val TAG = "CourseListActivity"
-    val STUDENT_URL = "https://attendance-app-dev.herokuapp.com/api/v1/students"
     var SECTION_SUFFIX = "sections"
-
     val PREFERENCES_NAME = "AuthenticationPreferences"
-    lateinit var preferences: SharedPreferences
 
     lateinit var context: Context
+    lateinit var preferences: SharedPreferences
     lateinit var courseList: ArrayList<String>
     lateinit var courseListView : ListView
 

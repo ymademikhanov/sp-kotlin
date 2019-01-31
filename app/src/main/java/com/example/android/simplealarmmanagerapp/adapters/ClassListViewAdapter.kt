@@ -1,4 +1,4 @@
-package com.example.android.simplealarmmanagerapp.listview_adapters
+package com.example.android.simplealarmmanagerapp.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import com.example.android.simplealarmmanagerapp.R
-import com.example.android.simplealarmmanagerapp.listview_models.ClassListViewModel
+import com.example.android.simplealarmmanagerapp.models.listview_models.ClassListViewModel
 
 class ClassListViewAdapter(var mCtx: Context, var resource: Int, var items: List<ClassListViewModel>)
     : ArrayAdapter<ClassListViewModel>(mCtx, resource, items) {

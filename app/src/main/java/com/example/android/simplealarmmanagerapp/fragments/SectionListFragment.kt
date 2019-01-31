@@ -13,11 +13,11 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import com.example.android.simplealarmmanagerapp.R
-import com.example.android.simplealarmmanagerapp.constants.PREFERENCES_NAME
-import com.example.android.simplealarmmanagerapp.constants.SECTION_ID_EXTRA
-import com.example.android.simplealarmmanagerapp.constants.MY_SECTION_URL
-import com.example.android.simplealarmmanagerapp.constants.SECTION_COURSE_TITLE
+import com.example.android.simplealarmmanagerapp.utilities.constants.SECTION_ID_EXTRA
+import com.example.android.simplealarmmanagerapp.utilities.constants.MY_SECTION_URL
+import com.example.android.simplealarmmanagerapp.utilities.constants.SECTION_COURSE_TITLE
 import com.example.android.simplealarmmanagerapp.models.Section
+import com.example.android.simplealarmmanagerapp.utilities.constants.AUTH_PREFERENCE_NAME
 import com.google.gson.Gson
 import org.json.JSONArray
 
@@ -32,7 +32,10 @@ class SectionListFragment : Fragment() {
     lateinit var sectionListView : ListView
     lateinit var progressDialog: ProgressDialog
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(inflater: LayoutInflater,
+                              container: ViewGroup?,
+                              savedInstanceState: Bundle?):
+            View {
         fragmentView = inflater.inflate(R.layout.section_list_layout, container, false)
         return fragmentView
     }
@@ -57,7 +60,7 @@ class SectionListFragment : Fragment() {
             transaction.commit()
         }
 
-        preferences = activity.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        preferences = activity.getSharedPreferences(AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE)
         val jwt = preferences.getString("jwt", "")
         Log.i(TAG, "Started loading sections by jwt $jwt")
         progressDialog.setMessage("Loading sections ...")
@@ -80,8 +83,8 @@ class SectionListFragment : Fragment() {
             for (i in 0..(sections.length() - 1)) {
                 val obj = sections.getJSONObject(i)
                 val objectJSONString = obj.toString()
-                val section = Gson().fromJson(objectJSONString, Section::class.java)
                 Log.i(TAG, "Object JSON: $objectJSONString")
+                val section = Gson().fromJson(objectJSONString, Section::class.java)
                 Log.i(TAG, "Section: $section")
                 sectionList.add(section)
                 sectionTitleList.add(section.course!!.title)

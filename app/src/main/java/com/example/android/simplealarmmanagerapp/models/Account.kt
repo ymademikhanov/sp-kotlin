@@ -2,8 +2,12 @@ package com.example.android.simplealarmmanagerapp.models
 
 import org.json.JSONObject
 
-open class Account(var email: String, var password: String) {
-    var accountId: Int = 1
+open class Account(var email: String,
+                   var password: String,
+                   var firstname: String?,
+                   var lastname: String?) {
+    var id: Int = 1
+    var type: String? = null
 
     open fun getJSON(): JSONObject {
         val payload = mapOf(
@@ -13,6 +17,6 @@ open class Account(var email: String, var password: String) {
     }
 
     override fun toString(): String {
-        return "{ accountId: $accountId\nemail: $email\npassword: $password }";
+        return "Account{ id: $id, email: $email} "
     }
 }

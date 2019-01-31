@@ -1,4 +1,4 @@
-package com.example.android.simplealarmmanagerapp.form_creators
+package com.example.android.simplealarmmanagerapp.utilities.form_creators
 
 import android.content.Context
 import android.util.Log
@@ -8,9 +8,8 @@ import android.widget.LinearLayout
 import com.example.android.simplealarmmanagerapp.models.FormField
 import com.example.android.simplealarmmanagerapp.models.FormFieldType
 import com.example.android.simplealarmmanagerapp.models.Student
-import khttp.get
 
-class StudentSignUpFormCreator(var context: Context) {
+class StudentSignUpFormCreator(var context: Context, var listener: View.OnClickListener) {
     var TAG: String = "InstructorFormCreator"
     lateinit var layout: LinearLayout
     lateinit var studentIdField: FormField
@@ -33,9 +32,7 @@ class StudentSignUpFormCreator(var context: Context) {
         submitButton = Button(context)
         submitButton.text = "Register"
 
-        submitButton.setOnClickListener(View.OnClickListener {
-            Log.d(TAG, getStudent().toString())
-        })
+        submitButton.setOnClickListener(listener)
 
         layout.addView(studentIdField.editText)
         layout.addView(firstnameField.editText)
