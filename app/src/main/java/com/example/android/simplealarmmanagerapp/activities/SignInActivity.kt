@@ -1,6 +1,7 @@
 package com.example.android.simplealarmmanagerapp.activities
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.android.simplealarmmanagerapp.R
@@ -38,6 +39,14 @@ class SignInActivity : AppCompatActivity() {
                 title = getString(R.string.password)
                 titleTextColor = PRIMARY_COLOR
                 titleFocusedTextColor = PRIMARY_DARK_COLOR
+            }
+            button(1) {
+                title = "Sign up"
+                backgroundColor = PRIMARY_COLOR
+                titleTextColor = Color.WHITE
+                valueObservers.add({ _, _ ->
+                    // Nothing was changed but the button was tapped!
+                })
             }
         }
     }

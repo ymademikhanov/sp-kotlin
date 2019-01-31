@@ -53,18 +53,24 @@ class YetAnotherAuthActivity : AppCompatActivity() {
                 titleTextColor = PRIMARY_COLOR
                 titleFocusedTextColor = PRIMARY_DARK_COLOR
             }
-            number(Tag.Number.ordinal) {
-                numbersOnly = true
-                title = getString(R.string.studentID)
+            text(Tag.Text.ordinal) {
+                title = "Office"
                 titleTextColor = PRIMARY_COLOR
                 titleFocusedTextColor = PRIMARY_DARK_COLOR
             }
-            dateTime(1) {
-                dateValue = Date()
-                title = "Birth date"
+            phone(Tag.Number.ordinal) {
+                title = "Phone"
                 titleTextColor = PRIMARY_COLOR
                 titleFocusedTextColor = PRIMARY_DARK_COLOR
-                dateFormat = SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.US)
+            }
+            button(1) {
+                value = "Sign up"
+                backgroundColor = PRIMARY_COLOR
+                valueTextColor = Color.WHITE
+
+                valueObservers.add({ _, _ ->
+                    // Nothing was changed but the button was tapped!
+                })
             }
         }
     }

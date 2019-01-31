@@ -48,7 +48,8 @@
         <activity
             android:name=".activities.YetAnotherAuthActivity"
             android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysVisible">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -56,9 +57,12 @@
             </intent-filter>
 
 
+
         </activity>
 
-        <activity android:name=".activities.SignInActivity">
+        <activity android:name=".activities.SignInActivity"
+            android:windowSoftInputMode="stateVisible">
+
 
         </activity>
 
