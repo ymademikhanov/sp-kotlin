@@ -1,5 +1,7 @@
 package com.example.android.simplealarmmanagerapp.utilities.constants
 
+import android.graphics.Color
+
 const val TARGET_BEACON_ADDRESS_CONST = "targetBeaconAddress"
 const val MY_SECTION_URL = "https://attendance-app-dev.herokuapp.com/api/v1/me/sections"
 const val SECTIONS_URL = "https://attendance-app-dev.herokuapp.com/api/v1/sections"
@@ -32,3 +34,6 @@ const val AUTH_PREFERENCE_NAME = "AuthenticationPreferences"
 const val TARGET_DEVICE_PREFERENCES_NAME = "TargetDevicePreferences"
 
 const val BAC_PREFERENCES_NAME = "AttendanceCheckScanPreferences"
+
+var PRIMARY_COLOR = Color.parseColor("#AB6C35")
+var PRIMARY_DARK_COLOR = Color.parseColor("#935116")

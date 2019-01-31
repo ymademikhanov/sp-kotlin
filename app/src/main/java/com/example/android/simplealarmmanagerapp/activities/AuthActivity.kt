@@ -18,18 +18,12 @@ import com.example.android.simplealarmmanagerapp.utilities.form_creators.Student
 import com.example.android.simplealarmmanagerapp.models.Account
 import com.example.android.simplealarmmanagerapp.models.AuthenticationMode
 import com.example.android.simplealarmmanagerapp.models.Student
-import com.example.android.simplealarmmanagerapp.utilities.JwtToJson
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.AuthSubscriber
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.SignInPerformer
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.SignUpPerformer
 import com.example.android.simplealarmmanagerapp.utilities.constants.*
 import com.example.android.simplealarmmanagerapp.utilities.network.Resource
-import com.example.android.simplealarmmanagerapp.utilities.preferences.removeUser
-import khttp.post
-import khttp.responses.Response
-
 import kotlinx.android.synthetic.main.activity_auth.*
-
 
 class AuthActivity : AppCompatActivity(), View.OnClickListener, AuthSubscriber {
     val TAG = "AuthActivity"

@@ -31,7 +31,7 @@
         <receiver android:name=".receivers.DisableNetworkBR" />
 
         <service
-            android:name=".services.AttendanceCheckService"
+            android:name=".services.AttendanceCheckService" android:permission="" 
             android:enabled="true"
             android:exported="true" />
 
@@ -49,12 +49,17 @@
             android:name=".activities.YetAnotherAuthActivity"
             android:label="@string/title_activity_home"
             android:theme="@style/AppTheme.NoActionBar">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+
+        </activity>
+
+        <activity android:name=".activities.SignInActivity">
+
         </activity>
 
     </application>
