@@ -3,4 +3,10 @@
     <color name="colorPrimary">#AB6C35</color>
     <color name="colorPrimaryDark">#935116</color>
     <color name="colorAccent">#935116</color>
+
+
+    <!--KFormMaster colors-->
+    <color name="colorFormMasterElementTextTitle">#AB6C35</color>
+    <color name="colorFormMasterElementFocusedTitle">#935116</color>
+    <color name="colorFormMasterElementButtonText">#FFFFFF</color>
 </resources>

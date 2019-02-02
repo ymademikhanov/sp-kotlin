@@ -2,7 +2,6 @@ package com.example.android.simplealarmmanagerapp.activities
 
 import android.content.Context
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NO_HISTORY
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
@@ -11,106 +10,127 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.android.simplealarmmanagerapp.R
 import com.example.android.simplealarmmanagerapp.models.Account
+import com.example.android.simplealarmmanagerapp.models.Student
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.AuthSubscriber
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.SignInPerformer
-import com.example.android.simplealarmmanagerapp.utilities.constants.AUTH_PREFERENCE_NAME
-import com.example.android.simplealarmmanagerapp.utilities.constants.PRIMARY_COLOR
-import com.example.android.simplealarmmanagerapp.utilities.constants.PRIMARY_DARK_COLOR
-import com.example.android.simplealarmmanagerapp.utilities.constants.SIGN_IN_URL
+import com.example.android.simplealarmmanagerapp.utilities.auth_network.SignUpPerformer
+import com.example.android.simplealarmmanagerapp.utilities.constants.*
 import com.example.android.simplealarmmanagerapp.utilities.network.Resource
 import com.forms.sti.progresslitieigb.ProgressLoadingIGB
 import com.forms.sti.progresslitieigb.finishLoadingIGB
 import com.thejuki.kformmaster.helper.*
 import com.thejuki.kformmaster.model.FormEmailEditTextElement
+import com.thejuki.kformmaster.model.FormNumberEditTextElement
 import com.thejuki.kformmaster.model.FormPasswordEditTextElement
-import kotlinx.android.synthetic.main.activity_signin.*
+import com.thejuki.kformmaster.model.FormSingleLineEditTextElement
+import com.thejuki.kformmaster.state.FormEditTextViewState
+import kotlinx.android.synthetic.main.activity_sign_up_student.*
 
-class SignInActivity : AppCompatActivity(), AuthSubscriber {
+class StudentSignUpActivity : AppCompatActivity(), AuthSubscriber {
 
     lateinit var context: Context
-    lateinit var signInForm: FormBuildHelper
+    lateinit var signUpForm: FormBuildHelper
     lateinit var preferences: SharedPreferences
-    var account: Account? = null
 
-    private enum class Tag {
-        Email,
-        Password,
-    }
+    var account: Account? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_sign_up_student)
 
         // Initialize variables.
         context = this
         preferences = context.getSharedPreferences(AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE)
-        account = loadSavedAccount()
-
-        setContentView(R.layout.activity_signin)
 
         // Initializing UI.
         initUI()
+    }
 
-        // If account already signed in before.
-        if (account != null) {
-            performSignIn(account!!)
-        }
+    private enum class Tag {
+        Email,
+        Password,
+        First,
+        Last,
+        StudentID
     }
 
     private fun initUI() {
-        // Initializing sign-in form.
-        signInForm = form(context, findViewById(R.id.signInRecyclerView)) {
+        // Initialize sign-up form.
+
+        signUpForm = form(context, findViewById(R.id.signUpRecyclerView)) {
             email(Tag.Email.ordinal) {
                 title = getString(R.string.email)
-                value = account?.email
                 required = true
             }
             password(Tag.Password.ordinal) {
                 title = getString(R.string.password)
-                value = account?.password
                 required = true
             }
+            text(Tag.First.ordinal) {
+                title = getString(R.string.firstname)
+                required = true
+            }
+            text(Tag.Last.ordinal) {
+                title = getString(R.string.lastname)
+                required = true
+            }
+            number(Tag.StudentID.ordinal) {
+                title = "Student ID"
+                required = true
+                numbersOnly = true
+            }
             button(1) {
-                value = "Sign in"
+                value = "Sign up"
                 backgroundColor = PRIMARY_COLOR
 
                 valueObservers.add { _, _ ->
                     // Performing sign-in.
-                    if (signInForm.isValidForm) {
-                        val email = signInForm
+                    if (signUpForm.isValidForm) {
+                        val email = signUpForm
                                 .getFormElement<FormEmailEditTextElement>(Tag.Email.ordinal)
                                 .value
-                        val password = signInForm
+                        val password = signUpForm
                                 .getFormElement<FormPasswordEditTextElement>(Tag.Password.ordinal)
                                 .value
-                        val account = Account(email!!, password!!, null, null)
-                        performSignIn(account)
+                        val firstname = signUpForm
+                                .getFormElement<FormSingleLineEditTextElement>(Tag.First.ordinal)
+                                .value
+                        val lastname = signUpForm
+                                .getFormElement<FormSingleLineEditTextElement>(Tag.Last.ordinal)
+                                .value
+                        val studentID = signUpForm
+                                .getFormElement<FormNumberEditTextElement>(Tag.StudentID.ordinal)
+                                .value.toString().toInt()
+
+                        val student = Student(studentID, email!!, password!!, firstname, lastname)
+                        performSignUp(student)
                     }
                 }
             }
         }
 
-        // Setting behavior on click on switch to sign up button.
-        switch_to_student_sign_up.setOnClickListener(object: View.OnClickListener{
+        // Setting behavior on click on switch to sign in button.
+        switch_to_sign_in.setOnClickListener(object: View.OnClickListener{
             override fun onClick(v: View?) {
-                val signUpActivityIntent = Intent(context, StudentSignUpActivity::class.java)
-                signUpActivityIntent.addFlags(FLAG_ACTIVITY_NO_HISTORY)
-                startActivity(signUpActivityIntent)
+                val signInActivityIntent = Intent(context, SignInActivity::class.java)
+                signInActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                startActivity(signInActivityIntent)
                 finish()
             }
         })
     }
 
-    fun performSignIn(account: Account) {
+    fun performSignUp(account: Account) {
         // Starting loading dialog.
         ProgressLoadingIGB.startLoadingIGB(context) {
-            message = "Signing in!"
+            message = "Signing up!"
             srcLottieJson = R.raw.progress_animation
             timer = 1000000
         }
 
         // Running sign-in performer.
-        val signInPerformer = SignInPerformer(this, SIGN_IN_URL)
-        signInPerformer.execute(account)
+        val signUpPerformer = SignUpPerformer(this, STUDENT_URL)
+        signUpPerformer.execute(account)
     }
 
     override fun handleAuthUpdate(pair: Pair<Resource<Account>, String?>) {
@@ -120,19 +140,11 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
         when(resource.status) {
             Resource.Status.SUCCESS -> {
                 finishLoadingIGB()
-                ProgressLoadingIGB.startLoadingIGB(context) {
-                    message = "Success!"
-                    srcLottieJson = R.raw.loading_success
-                    timer = 1000
-                }
-
                 saveAccountToDevice(resource.data!!, jwt!!)
-
-                Handler().postDelayed({
-                    finishLoadingIGB()
-                    val homeActivityIntent = Intent(context, HomeActivity::class.java)
-                    startActivity(homeActivityIntent)
-                }, 1000)
+                val signInActivityIntent = Intent(context, SignInActivity::class.java)
+                signInActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                startActivity(signInActivityIntent)
+                finish()
             }
             Resource.Status.ERROR -> {
                 finishLoadingIGB()
@@ -143,15 +155,6 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
                 }
             }
         }
-    }
-
-    private fun loadSavedAccount() : Account? {
-        if (preferences.getBoolean("signedIn", false)) {
-            val email = preferences.getString("email", "")
-            val password = preferences.getString("password", "")
-            return Account(email!!, password!!, null, null)
-        }
-        return null
     }
 
     private fun saveAccountToDevice(account: Account, jwt: String) {
