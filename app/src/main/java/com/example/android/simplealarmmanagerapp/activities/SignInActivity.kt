@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NO_HISTORY
 import android.content.SharedPreferences
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
@@ -15,7 +14,6 @@ import com.example.android.simplealarmmanagerapp.utilities.auth_network.AuthSubs
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.SignInPerformer
 import com.example.android.simplealarmmanagerapp.utilities.constants.AUTH_PREFERENCE_NAME
 import com.example.android.simplealarmmanagerapp.utilities.constants.PRIMARY_COLOR
-import com.example.android.simplealarmmanagerapp.utilities.constants.PRIMARY_DARK_COLOR
 import com.example.android.simplealarmmanagerapp.utilities.constants.SIGN_IN_URL
 import com.example.android.simplealarmmanagerapp.utilities.network.Resource
 import com.forms.sti.progresslitieigb.ProgressLoadingIGB
@@ -26,6 +24,7 @@ import com.thejuki.kformmaster.model.FormPasswordEditTextElement
 import kotlinx.android.synthetic.main.activity_signin.*
 
 class SignInActivity : AppCompatActivity(), AuthSubscriber {
+    val TAG = "SignInActivity"
 
     lateinit var context: Context
     lateinit var signInForm: FormBuildHelper
@@ -126,7 +125,8 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
                     timer = 1000
                 }
 
-                saveAccountToDevice(resource.data!!, jwt!!)
+
+
 
                 Handler().postDelayed({
                     finishLoadingIGB()
