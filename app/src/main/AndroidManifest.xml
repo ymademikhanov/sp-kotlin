@@ -31,24 +31,25 @@
         <receiver android:name=".receivers.DisableNetworkBR" />
 
         <service
-            android:name=".services.AttendanceCheckService"
+            android:name=".services.AttendanceCheckService" android:permission="" 
             android:enabled="true"
             android:exported="true" />
 
-        <activity
-            android:name=".activities.AuthActivity"
-            android:label="@string/title_activity_auth">
-
-        </activity>
         <activity
             android:name=".activities.HomeActivity"
             android:label="@string/title_activity_home"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
-            android:name=".activities.YetAnotherAuthActivity"
+            android:name=".activities.StudentSignUpActivity"
             android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:windowSoftInputMode="stateAlwaysVisible">
+
+
+        </activity>
+
+        <activity android:name=".activities.SignInActivity"
+            android:windowSoftInputMode="stateVisible">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

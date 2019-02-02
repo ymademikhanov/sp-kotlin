@@ -74,6 +74,7 @@ class SectionListFragment : Fragment() {
             sectionTitleList.clear()
             sectionList.clear()
             val jwt = jwts[0]
+            Log.i(TAG, "JWT: $jwt")
             val response = khttp.get(MY_SECTION_URL, headers=mapOf("x-auth" to jwt))
             Log.i(TAG, "Response: ${response.jsonArray}")
             return response.jsonArray

@@ -1,15 +1,15 @@
 package com.example.android.simplealarmmanagerapp.utilities.auth_network
 
-import android.content.Context
 import android.os.AsyncTask
 import android.util.Log
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
 import com.example.android.simplealarmmanagerapp.models.Account
 import com.example.android.simplealarmmanagerapp.utilities.JwtToJson
-import com.example.android.simplealarmmanagerapp.utilities.constants.AUTH_PREFERENCE_NAME
 import com.example.android.simplealarmmanagerapp.utilities.constants.JWT_HEADER_NAME
+import com.example.android.simplealarmmanagerapp.utilities.network.APIClient
 import com.example.android.simplealarmmanagerapp.utilities.network.Resource
+import com.example.android.simplealarmmanagerapp.utilities.network.StudentAPI
 import khttp.post
 import khttp.responses.Response
 
@@ -26,9 +26,11 @@ class SignInPerformer(private val authSubscriber: AuthSubscriber?, private val u
     override fun doInBackground(vararg accounts: Account?): Response {
         account = accounts[0]
         val response = sendRequest(account)
+
         // Logging.
         Log.i(TAG, "Sign-in account: $account")
         Log.i(TAG, "Response: $response")
+
         return response
     }
 

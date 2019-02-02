@@ -12,7 +12,7 @@
 
     <EditText
         android:id="@+id/target_beacon_address_et"
-        android:layout_width="match_parent"
+        android:layout_width="match_parent" android:inputType="" 
         android:layout_height="wrap_content"
         android:hint="@string/target_beacon_address"
         />

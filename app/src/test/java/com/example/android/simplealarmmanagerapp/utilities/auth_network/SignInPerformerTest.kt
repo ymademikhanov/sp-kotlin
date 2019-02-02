@@ -11,7 +11,7 @@ import org.junit.Test
 class SignInPerformerTest {
     @Test
     fun successfulSignIn() {
-        val validAccount = Account("yer@nu.edu.kz", "qwerty")
+        val validAccount = Account("yer@nu.edu.kz", "qwerty", null, null)
         val signInPerformer = SignInPerformer(null, SIGN_IN_URL)
 
         // Running.
@@ -23,7 +23,7 @@ class SignInPerformerTest {
 
     @Test
     fun failedSignInWrongEmail() {
-        val validAccount = Account("random@random.kz", "qwerty")
+        val validAccount = Account("random@random.kz", "qwerty", null, null)
         val signInPerformer = SignInPerformer(null, SIGN_IN_URL)
 
         // Running.
@@ -38,7 +38,7 @@ class SignInPerformerTest {
 
     @Test
     fun failedSignInWrongPassword() {
-        val validAccount = Account("yer@nu.edu.kz", "wront_password")
+        val validAccount = Account("yer@nu.edu.kz", "wront_password", null, null)
         val signInPerformer = SignInPerformer(null, SIGN_IN_URL)
 
         // Running.
