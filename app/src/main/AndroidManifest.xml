@@ -41,6 +41,11 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
+            android:name=".activities.YetAnotherHomeActivity"
+            android:label="@string/title_activity_home"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
             android:name=".activities.StudentSignUpActivity"
             android:label="@string/title_activity_home"
             android:windowSoftInputMode="stateAlwaysVisible">

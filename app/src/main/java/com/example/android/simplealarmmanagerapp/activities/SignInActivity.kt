@@ -125,12 +125,9 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
                     timer = 1000
                 }
 
-
-
-
                 Handler().postDelayed({
                     finishLoadingIGB()
-                    val homeActivityIntent = Intent(context, HomeActivity::class.java)
+                    val homeActivityIntent = Intent(context, YetAnotherHomeActivity::class.java)
                     startActivity(homeActivityIntent)
                 }, 1000)
             }
