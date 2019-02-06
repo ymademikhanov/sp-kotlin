@@ -10,7 +10,7 @@ import com.example.android.simplealarmmanagerapp.R
 import kotlinx.android.synthetic.main.activity_main.*
 import androidx.navigation.ui.NavigationUI
 
-class YetAnotherHomeActivity : AppCompatActivity(){
+class MainActivity : AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

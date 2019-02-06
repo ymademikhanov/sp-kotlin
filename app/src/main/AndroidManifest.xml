@@ -36,7 +36,7 @@
             android:exported="true" />
 
         <activity
-            android:name=".activities.YetAnotherHomeActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/title_activity_home"
             android:theme="@style/AppTheme.NoActionBar" />
 

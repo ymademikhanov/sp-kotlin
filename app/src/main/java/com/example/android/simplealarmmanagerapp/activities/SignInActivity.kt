@@ -127,7 +127,8 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
 
                 Handler().postDelayed({
                     finishLoadingIGB()
-                    val homeActivityIntent = Intent(context, YetAnotherHomeActivity::class.java)
+                    saveAccountToDevice(resource.data!!, jwt!!)
+                    val homeActivityIntent = Intent(context, MainActivity::class.java)
                     startActivity(homeActivityIntent)
                 }, 1000)
             }

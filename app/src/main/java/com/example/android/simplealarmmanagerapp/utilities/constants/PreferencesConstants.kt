@@ -35,5 +35,8 @@ const val TARGET_DEVICE_PREFERENCES_NAME = "TargetDevicePreferences"
 
 const val BAC_PREFERENCES_NAME = "AttendanceCheckScanPreferences"
 
+const val WEEKLY_ATTENDANCE_CHECK_LOADER_PREFIX = "weeklyAttendanceCheckLoader"
+const val CLASS_NOTIFICATION_PREFIX = "classNotificationPrefix"
+
 var PRIMARY_COLOR = Color.parseColor("#AB6C35")
 var PRIMARY_DARK_COLOR = Color.parseColor("#935116")
