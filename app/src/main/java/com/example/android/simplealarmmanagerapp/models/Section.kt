@@ -1,12 +1,15 @@
 package com.example.android.simplealarmmanagerapp.models
 
-import java.sql.Timestamp
+import com.google.gson.annotations.SerializedName
 
 class Section(var id: Int? = null,
               var courseId: Int? = null,
               var code: String? = null,
               var checksTotalDefault: Int? = null,
               var roomId: Int? = null,
+
+              @SerializedName("passed_classes") val passedClasses: Int? = null,
+              @SerializedName("attended_classes") val attendedClasses: Int? = null,
 
               var course: Course? = null,
               var room: String? = null,

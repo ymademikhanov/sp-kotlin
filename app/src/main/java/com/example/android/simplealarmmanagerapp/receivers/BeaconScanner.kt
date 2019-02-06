@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.example.android.simplealarmmanagerapp.services.AttendanceCheckService
 import com.example.android.simplealarmmanagerapp.utilities.network.NetworkManager
 
 class BeaconScanner : BroadcastReceiver() {
@@ -14,7 +15,7 @@ class BeaconScanner : BroadcastReceiver() {
         // Turning on Wifi.
         NetworkManager.enableNetwork(context!!)
 
-        val intentService = Intent(context, BluetoothService::class.java)
+        val intentService = Intent(context, AttendanceCheckService::class.java)
         val attendanceID = intent?.getIntExtra("attendanceId", 0)
         val attendanceCheckID = intent?.getIntExtra("attendanceCheckId", 0)
 

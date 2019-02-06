@@ -32,7 +32,7 @@
         <receiver android:name=".receivers.NextClassNotifier" />
 
         <service
-            android:name=".services.AttendanceCheckService" android:permission="" 
+            android:name=".services.AttendanceCheckService"
             android:enabled="true"
             android:exported="true" />
 
