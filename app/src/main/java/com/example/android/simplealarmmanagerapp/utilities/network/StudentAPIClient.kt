@@ -3,7 +3,7 @@ package com.example.android.simplealarmmanagerapp.utilities.network
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class APIClient {
+class StudentAPIClient {
     companion object {
 
         val baseURL: String = "https://attendance-app-dev.herokuapp.com/api/v1/"

@@ -10,6 +10,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.android.simplealarmmanagerapp.R
 import com.example.android.simplealarmmanagerapp.models.Account
+import com.example.android.simplealarmmanagerapp.utilities.LocalAccountManager
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.AuthSubscriber
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.SignInPerformer
 import com.example.android.simplealarmmanagerapp.utilities.constants.AUTH_PREFERENCE_NAME
@@ -42,7 +43,7 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
         // Initialize variables.
         context = this
         preferences = context.getSharedPreferences(AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE)
-        account = loadSavedAccount()
+        account = LocalAccountManager.loadAccount(preferences)
 
         setContentView(R.layout.activity_signin)
 
@@ -89,14 +90,11 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
         }
 
         // Setting behavior on click on switch to sign up button.
-        switch_to_student_sign_up.setOnClickListener(object: View.OnClickListener{
-            override fun onClick(v: View?) {
-                val signUpActivityIntent = Intent(context, StudentSignUpActivity::class.java)
-                signUpActivityIntent.addFlags(FLAG_ACTIVITY_NO_HISTORY)
-                startActivity(signUpActivityIntent)
-                finish()
-            }
-        })
+        switch_to_student_sign_up.setOnClickListener {
+            val signUpActivityIntent = Intent(context, StudentSignUpActivity::class.java)
+            startActivity(signUpActivityIntent)
+            finish()
+        }
     }
 
     fun performSignIn(account: Account) {
@@ -127,7 +125,7 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
 
                 Handler().postDelayed({
                     finishLoadingIGB()
-                    saveAccountToDevice(resource.data!!, jwt!!)
+                    LocalAccountManager.saveAccount(preferences, resource.data!!, jwt!!)
                     val homeActivityIntent = Intent(context, MainActivity::class.java)
                     startActivity(homeActivityIntent)
                 }, 1000)
@@ -141,25 +139,5 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
                 }
             }
         }
-    }
-
-    private fun loadSavedAccount() : Account? {
-        if (preferences.getBoolean("signedIn", false)) {
-            val email = preferences.getString("email", "")
-            val password = preferences.getString("password", "")
-            return Account(email!!, password!!, null, null)
-        }
-        return null
-    }
-
-    private fun saveAccountToDevice(account: Account, jwt: String) {
-        val editor = preferences.edit()
-        editor.putString("email", account.email)
-        editor.putString("password", account.password)
-        editor.putInt("id", account.id)
-        editor.putString("type", account.type)
-        editor.putBoolean("signedIn", true)
-        editor.putString("jwt", jwt)
-        editor.apply()
     }
 }

@@ -26,9 +26,10 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".activities.CourseListActivity" />
 
-        <receiver android:name=".receivers.AttendanceCheckBR" />
-        <receiver android:name=".receivers.NotifyNextClassBR" />
-        <receiver android:name=".receivers.DisableNetworkBR" />
+        <receiver android:name=".receivers.WeeklyBTCheckScheduler" />
+        <receiver android:name=".receivers.BeaconScanner" />
+        <receiver android:name=".receivers.NetworkDisabler" />
+        <receiver android:name=".receivers.NextClassNotifier" />
 
         <service
             android:name=".services.AttendanceCheckService" android:permission="" 

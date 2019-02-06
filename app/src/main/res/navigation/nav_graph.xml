@@ -6,17 +6,17 @@
     app:startDestination="@id/destination_home">
     <fragment
         android:id="@+id/destination_settings"
-        android:name="com.example.android.simplealarmmanagerapp.SettingsFragment"
+        android:name="com.example.android.simplealarmmanagerapp.fragments.SettingsFragment"
         android:label="Settings"
         tools:layout="@layout/fragment_settings" />
     <fragment
         android:id="@+id/destination_course_info"
-        android:name="com.example.android.simplealarmmanagerapp.CourseInfoFragment"
+        android:name="com.example.android.simplealarmmanagerapp.fragments.CourseInfoFragment"
         android:label="Course info"
         tools:layout="@layout/fragment_course_info" />
     <fragment
         android:id="@+id/destination_home"
-        android:name="com.example.android.simplealarmmanagerapp.HomeFragment"
+        android:name="com.example.android.simplealarmmanagerapp.fragments.HomeFragment"
         android:label="Home"
         tools:layout="@layout/fragment_home">
         <action
