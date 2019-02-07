@@ -8,8 +8,11 @@ class Section(var id: Int? = null,
               var checksTotalDefault: Int? = null,
               var roomId: Int? = null,
 
-              @SerializedName("passed_classes") val passedClasses: Int? = null,
-              @SerializedName("attended_classes") val attendedClasses: Int? = null,
+              @SerializedName("passed_classes")
+              val passedClasses: Int? = null,
+
+              @SerializedName("attended_classes")
+              val attendedClasses: Int? = null,
 
               var course: Course? = null,
               var room: String? = null,
@@ -17,6 +20,6 @@ class Section(var id: Int? = null,
               var classes: List<Class>? = null
 ) {
     override fun toString(): String {
-        return "Section{ course id: $courseId, code : $code, roomID: $roomId} "
+        return "Section { course id: $courseId, code : $code, roomID: $roomId} "
     }
 }
