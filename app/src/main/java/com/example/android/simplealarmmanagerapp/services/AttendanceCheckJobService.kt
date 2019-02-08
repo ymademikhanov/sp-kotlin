@@ -3,25 +3,20 @@ package com.example.android.simplealarmmanagerapp.services
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager
-import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.*
-import android.os.AsyncTask
-import android.os.IBinder
 import android.util.Log
+import androidx.core.app.JobIntentService
 import com.example.android.simplealarmmanagerapp.R
 import com.example.android.simplealarmmanagerapp.models.entities.AttendanceCheckReport
 import com.example.android.simplealarmmanagerapp.utilities.constants.BAC_PREFERENCES_NAME
-import com.example.android.simplealarmmanagerapp.utilities.constants.ATTENDANCE_URL
 import com.example.android.simplealarmmanagerapp.utilities.constants.TARGET_BEACON_ADDRESS_CONST
-import khttp.patch
-import khttp.responses.Response
-import org.json.JSONObject
 import kotlin.concurrent.thread
 
-class AttendanceCheckService : Service() {
-    var TAG = "AttendanceCheckService"
+class AttendanceCheckJobService: JobIntentService() {
+
+    val TAG = "AttCheckJobService"
 
     val ATTENDANCE_CHECK_DURATION_MILLIS: Long = 20000
 
@@ -32,14 +27,22 @@ class AttendanceCheckService : Service() {
     var attendanceId : Int = 0
     var attendanceCheckId : Int = 0
 
-    override fun onCreate() {
-        Log.i(TAG, "onCreate()")
-        preferences =
-                applicationContext.getSharedPreferences(BAC_PREFERENCES_NAME, Context.MODE_PRIVATE)
-        super.onCreate()
+    companion object {
+        val JOB_ID = 1000
+
+        fun enqueueWork(context: Context, work: Intent) {
+            enqueueWork(context, AttendanceCheckJobService::class.java, JOB_ID, work)
+        }
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onCreate() {
+        super.onCreate()
+        Log.d(TAG, "onCreate()")
+        preferences =
+                applicationContext.getSharedPreferences(BAC_PREFERENCES_NAME, Context.MODE_PRIVATE)
+    }
+
+    override fun onHandleWork(intent: Intent) {
         Log.i(TAG, "onStartCommand()")
         targetAddress = preferences.getString(TARGET_BEACON_ADDRESS_CONST, "")
 
@@ -57,13 +60,6 @@ class AttendanceCheckService : Service() {
             stopDiscoverAndDisableBluetooth()
             stopService(intent)
         }
-
-        return super.onStartCommand(intent, flags, startId)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(mReceiver)
     }
 
     private val mReceiver = object : BroadcastReceiver() {
@@ -71,10 +67,10 @@ class AttendanceCheckService : Service() {
         var counter = 0
 
         @SuppressLint("PrivateResource")
-        fun createNotification(context: Context, deviceName: String, deviceHardwareAddress: String) {
+        fun createNotification(context: Context, deviceName: String, deviceAddress: String) {
             val builder = Notification.Builder(context)
                     .setContentTitle("Found a target beacon")
-                    .setContentText("Address is $deviceHardwareAddress")
+                    .setContentText("Address is $deviceAddress")
                     .setSmallIcon(R.drawable.notification_icon_background)
 
             val notificationManager =
@@ -109,10 +105,15 @@ class AttendanceCheckService : Service() {
                         val timestamp = System.currentTimeMillis()
 
                         // Reporting locally.
-                        val report = AttendanceCheckReport(10, attendanceCheckId, timestamp, false, deviceHardwareAddress)
+                        val report = AttendanceCheckReport(
+                                attendanceCheckID = attendanceCheckId,
+                                timestamp = timestamp,
+                                reported = false,
+                                foundDevice = deviceHardwareAddress)
+
                         AttendanceCheckReporter.report(applicationContext, report)
 
-                        AttendanceReporter().execute(attendanceId)
+//                        AttendanceReporter().execute(attendanceId)
                         createNotification(context, deviceName, deviceHardwareAddress)
                         stopDiscoverAndDisableBluetooth()
                     }
@@ -145,37 +146,14 @@ class AttendanceCheckService : Service() {
         mBluetoothAdapter.disable()
     }
 
-    override fun onBind(intent: Intent): IBinder? {
-        return null
+    override fun onStopCurrentWork(): Boolean {
+        Log.d(TAG, "onStopCurrentWork")
+        return super.onStopCurrentWork()
     }
 
-    inner class AttendanceReporter: AsyncTask<Int, String, Response>() {
-        override fun doInBackground(vararg args: Int?): Response {
-            Log.i(TAG, "Started sending attendance check")
-            val attendanceId = args[0]
-            val checkTime = System.currentTimeMillis()
-            val data = mapOf("attendance_id" to attendanceId, "checked" to true, "timestamp" to checkTime)
-            val jwt = preferences.getString("jwt", "")
-
-            Log.i(TAG, "Attendance check data: $data")
-            Log.i(TAG, "JWT token: $jwt")
-
-            val url = "$ATTENDANCE_URL/checks/$attendanceCheckId"
-
-            Log.i(TAG, "Url to send report $url")
-            val response = patch(url, data= JSONObject(data), headers = mapOf("x-auth" to jwt))
-
-            Log.i(TAG, "Attendance Report Response: $response")
-            return response
-        }
-
-        override fun onPostExecute(response: Response) {
-            if (response.statusCode == 200) {
-                Log.i(TAG, "Successful attendance report")
-            } else {
-                Log.i(TAG, "Attendance Reporter Error Content: ${response.content}")
-                Log.i(TAG, "Attendance Reporter Error Raw: ${response.raw}")
-            }
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy()")
+        unregisterReceiver(mReceiver)
     }
 }

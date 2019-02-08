@@ -5,7 +5,7 @@ import androidx.room.*
 @Entity(tableName = "attendance_check_report")
 data class AttendanceCheckReport(
         @PrimaryKey(autoGenerate = true)
-        val id: Int,
+        val id: Int? = null,
 
         @ColumnInfo(name = "attendance_check_id")
         val attendanceCheckID: Int,

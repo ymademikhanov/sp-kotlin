@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.android.simplealarmmanagerapp.models.entities.AttendanceCheckReport
 
-@Database(entities = [AttendanceCheckReport::class], version = 1)
+@Database(entities = [AttendanceCheckReport::class], version = 2)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun attendanceCheckReportDao(): AttendanceCheckReportDao
 

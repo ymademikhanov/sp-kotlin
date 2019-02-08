@@ -5,6 +5,8 @@ import android.util.Log
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
 import com.example.android.simplealarmmanagerapp.models.Account
+import com.example.android.simplealarmmanagerapp.models.entities.AttendanceCheckReport
+import com.example.android.simplealarmmanagerapp.services.AttendanceCheckReporter
 import com.example.android.simplealarmmanagerapp.utilities.JwtToJson
 import com.example.android.simplealarmmanagerapp.utilities.constants.JWT_HEADER_NAME
 import com.example.android.simplealarmmanagerapp.utilities.constants.MY_SECTION_URL

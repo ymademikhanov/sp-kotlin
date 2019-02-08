@@ -27,6 +27,13 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+
+    // Gradle automatically adds 'android.test.runner' as a dependency.
+    useLibrary 'android.test.runner'
+
+    useLibrary 'android.test.base'
+    useLibrary 'android.test.mock'
+
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
@@ -61,7 +68,13 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
 
+    // Khronos
     implementation 'com.github.hotchemi:khronos:0.9.0'
+
+    // Rx-Android
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.17'
+
 
     def room_version = "1.1.1"
 
@@ -80,16 +93,19 @@ dependencies {
     implementation 'com.github.mirrajabi:search-dialog:1.2.3'
 
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:core:1.1.0'
-//    androidTestImplementation 'androidx.test:runner:1.1.1'
-    androidTestImplementation 'androidx.test.espresso.idling:idling-net:3.1.1'
 
-    implementation 'com.android.support.test:runner:0.2'
-    implementation 'android.test.mock.MockContext '
+    // Core library
+    androidTestImplementation 'androidx.test:core:1.0.0'
+    // AndroidJUnitRunner and JUnit Rules
+    androidTestImplementation 'androidx.test:runner:1.1.0'
+    androidTestImplementation 'androidx.test:rules:1.1.0'
 
+    // Assertions
+    androidTestImplementation 'androidx.test.ext:junit:1.0.0'
+    androidTestImplementation 'androidx.test.ext:truth:1.0.0'
+    androidTestImplementation 'com.google.truth:truth:0.42'
 
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
 
-//    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
 }
