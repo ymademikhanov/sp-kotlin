@@ -69,33 +69,7 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
         Observable.fromCallable {
             db = AppDatabase.getAppDatabase(context = this)
             reportDao = db?.attendanceCheckReportDao()
-
-            val timestamp = System.currentTimeMillis()
-            val report1 = AttendanceCheckReport( attendanceCheckID = 1, timestamp = timestamp, reported = false, foundDevice = "android")
-            val report2 = AttendanceCheckReport( attendanceCheckID = 2, timestamp = timestamp, reported = true, foundDevice = "google")
-            val report3 = AttendanceCheckReport( attendanceCheckID = 3, timestamp = timestamp, reported = false, foundDevice = "chrome")
-            val report4 = AttendanceCheckReport( attendanceCheckID = 4, timestamp = timestamp, reported = true, foundDevice = "home")
-
-            with(reportDao){
-                this?.insert(report1)
-                this?.insert(report2)
-                this?.insert(report3)
-                this?.insert(report4)
-            }
             this.db?.attendanceCheckReportDao()?.getAll()
-//            this.db?.attendanceCheckReportDao()?.getUnreported()
-        }.doOnNext { list ->
-            var finalString = ""
-            list?.map { finalString+= "id: " + it.id.toString() + " - " + it.attendanceCheckID.toString() + " - " + it.timestamp.toString() + " - " + it.foundDevice + "\n"}
-            Log.i(TAG, "All attendance check reports: \n $finalString")
-        }.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe()
-
-        Observable.fromCallable {
-            db = AppDatabase.getAppDatabase(context = this)
-            reportDao = db?.attendanceCheckReportDao()
-            this.db?.attendanceCheckReportDao()?.getUnreported()
         }.doOnNext { list ->
             var finalString = ""
             list?.map { finalString+= "id: " + it.id.toString() + " - " + it.attendanceCheckID.toString() + " - " + it.timestamp.toString() + " - " + it.foundDevice + "\n"}
