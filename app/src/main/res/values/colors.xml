@@ -3,6 +3,7 @@
     <color name="colorPrimary">#AB6C35</color>
     <color name="colorPrimaryDark">#935116</color>
     <color name="colorAccent">#935116</color>
+    <color name="colorCourseInfoItem">#EDC999</color>
 
 
     <!--KFormMaster colors-->

@@ -20,6 +20,6 @@ class Section(var id: Int? = null,
               var classes: List<Class>? = null
 ) {
     override fun toString(): String {
-        return "Section { course id: $courseId, code : $code, roomID: $roomId} "
+        return "Section { course id: ${course?.id}, title : ${course?.title}, roomID: $roomId} "
     }
 }

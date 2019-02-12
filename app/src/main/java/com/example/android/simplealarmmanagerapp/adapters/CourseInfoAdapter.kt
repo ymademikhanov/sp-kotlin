@@ -1,5 +1,6 @@
 package com.example.android.simplealarmmanagerapp.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,13 +27,19 @@ class CourseInfoAdapter(private val courses: ArrayList<Section>): RecyclerView.A
     }
 
     override fun onBindViewHolder(holder: CourseInfoViewHolder, position: Int) {
-        holder.courseTitleTV.text = courses[position].course?.title
-        val attended = courses[position].attendedClasses
-        val passed = courses[position].passedClasses
-        holder.absentTV.text = attended.toString()
-        holder.totalTV.text = passed.toString()
-        holder.rateTV.text = (attended!! * 100 / passed!!).toString()
+        val section = courses[position]
+        holder.courseTitleTV.text = section.course?.title
+        val attended = section.attendedClasses
+        val passed = section.passedClasses
+        holder.absentTV.text = "$attended"
+        holder.totalTV.text = "$passed"
+        holder.rateTV.text = "${(attended!! * 100 / passed!!)}%"
+
+        Log.i("adapter", "holder ${holder}")
     }
 
-    override fun getItemCount() = courses.size
+    override fun getItemCount(): Int {
+        Log.i("adapter", "item count ${courses.size}")
+        return courses.size
+    }
 }
