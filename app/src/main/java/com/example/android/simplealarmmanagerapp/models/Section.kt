@@ -1,6 +1,6 @@
 package com.example.android.simplealarmmanagerapp.models
 
-import java.sql.Timestamp
+import com.google.gson.annotations.SerializedName
 
 class Section(var id: Int? = null,
               var courseId: Int? = null,
@@ -8,12 +8,18 @@ class Section(var id: Int? = null,
               var checksTotalDefault: Int? = null,
               var roomId: Int? = null,
 
+              @SerializedName("passed_classes")
+              val passedClasses: Int? = null,
+
+              @SerializedName("attended_classes")
+              val attendedClasses: Int? = null,
+
               var course: Course? = null,
               var room: String? = null,
               var sectionSlots: List<SectionSlot>? = null,
               var classes: List<Class>? = null
 ) {
     override fun toString(): String {
-        return "Section{ course id: $courseId, code : $code, roomID: $roomId} "
+        return "Section { course id: $courseId, code : $code, roomID: $roomId} "
     }
 }

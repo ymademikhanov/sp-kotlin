@@ -5,11 +5,14 @@ import android.util.Log
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
 import com.example.android.simplealarmmanagerapp.models.Account
+import com.example.android.simplealarmmanagerapp.models.entities.AttendanceCheckReport
+import com.example.android.simplealarmmanagerapp.services.AttendanceCheckReporter
 import com.example.android.simplealarmmanagerapp.utilities.JwtToJson
 import com.example.android.simplealarmmanagerapp.utilities.constants.JWT_HEADER_NAME
-import com.example.android.simplealarmmanagerapp.utilities.network.APIClient
+import com.example.android.simplealarmmanagerapp.utilities.constants.MY_SECTION_URL
 import com.example.android.simplealarmmanagerapp.utilities.network.Resource
 import com.example.android.simplealarmmanagerapp.utilities.network.StudentAPI
+import com.example.android.simplealarmmanagerapp.utilities.network.StudentAPIClient
 import khttp.post
 import khttp.responses.Response
 
@@ -30,6 +33,16 @@ class SignInPerformer(private val authSubscriber: AuthSubscriber?, private val u
         // Logging.
         Log.i(TAG, "Sign-in account: $account")
         Log.i(TAG, "Response: $response")
+
+
+        val jwt = response.headers[JWT_HEADER_NAME].toString()
+        val jwtMap = mapOf("X-auth" to jwt)
+        val studentAPIClient = StudentAPIClient.client.create<StudentAPI>(StudentAPI::class.java)
+
+        val sections = studentAPIClient.listSections(jwtMap)
+
+        val body = sections.execute().body()
+        print("sections: ${body}")
 
         return response
     }

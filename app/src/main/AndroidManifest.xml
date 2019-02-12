@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.android.simplealarmmanagerapp">
 
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -24,19 +25,29 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
+
+        <uses-library android:name="android.test.runner"
+            android:required="false" />
+
         <activity android:name=".activities.CourseListActivity" />
 
-        <receiver android:name=".receivers.AttendanceCheckBR" />
-        <receiver android:name=".receivers.NotifyNextClassBR" />
-        <receiver android:name=".receivers.DisableNetworkBR" />
+        <receiver android:name=".receivers.WeeklyBTCheckScheduler" />
+        <receiver android:name=".receivers.BeaconScanner" />
+        <receiver android:name=".receivers.NetworkDisabler" />
+        <receiver android:name=".receivers.NextClassNotifier" />
+
+        <service android:name=".services.AttendanceCheckJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            />
 
         <service
-            android:name=".services.AttendanceCheckService" android:permission="" 
+            android:name=".services.AttendanceCheckService"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".activities.HomeActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/title_activity_home"
             android:theme="@style/AppTheme.NoActionBar" />
 
@@ -59,5 +70,6 @@
         </activity>
 
     </application>
+
 
 </manifest>

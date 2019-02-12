@@ -13,6 +13,9 @@ interface StudentAPI {
     @GET("me/sections")
     fun listSections(@HeaderMap headers: Map<String, String>): Call<List<Section>>
 
+    @GET("me/attendances")
+    fun listSectionsWithAttendance(@HeaderMap headers: Map<String, String>): Call<List<Section>>
+
     @GET("sections/{sectionID}/classes")
     fun listClasses(@HeaderMap headers: Map<String, String>,
                            @Path("sectionID") sectionID: Int): Call<List<Class>>
