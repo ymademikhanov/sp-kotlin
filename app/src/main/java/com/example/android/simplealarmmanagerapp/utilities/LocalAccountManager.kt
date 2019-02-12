@@ -5,23 +5,23 @@ import com.example.android.simplealarmmanagerapp.models.Account
 
 class LocalAccountManager {
     companion object {
-        fun saveAccount(preferences: SharedPreferences, account: Account, jwt: String) {
-            val editor = preferences.edit()
-            editor.putString("email", account.email)
-            editor.putString("password", account.password)
-            editor.putInt("id", account.id)
-            editor.putString("type", account.type)
-            editor.putBoolean("signedIn", true)
-            editor.putString("jwt", jwt)
-            editor.apply()
+        fun saveAccount(prefs: SharedPreferences, account: Account, jwt: String) {
+            prefs.edit {
+                put("email" to account.email)
+                put("password" to account.password)
+                put("id" to account.id)
+                put("type" to account.type!!)
+                put("signedIn" to true)
+                put("jwt" to jwt)
+            }
         }
 
-        fun loadAccount(preferences: SharedPreferences) : Account? {
-            if (preferences.getBoolean("signedIn", false)) {
-                val email = preferences.getString("email", "")
-                val password = preferences.getString("password", "")
-                val type = preferences.getString("type", "")
-                val id = preferences.getInt("id", 0)
+        fun loadAccount(prefs: SharedPreferences) : Account? {
+            if (prefs.getBoolean("signedIn", false)) {
+                val email = prefs.getString("email", "")
+                val password = prefs.getString("password", "")
+                val type = prefs.getString("type", "")
+                val id = prefs.getInt("id", 0)
                 var account = Account(email!!, password!!, null, null)
                 account.type = type
                 account.id = id
@@ -30,15 +30,15 @@ class LocalAccountManager {
             return null
         }
 
-        fun deleteAccount(preferences: SharedPreferences) {
-            val editor = preferences.edit()
-            editor.remove("email")
-            editor.remove("password")
-            editor.remove("id")
-            editor.remove("type")
-            editor.remove("signedIn")
-            editor.remove("jwt")
-            editor.apply()
+        fun deleteAccount(prefs: SharedPreferences) {
+            prefs.edit {
+                remove("email")
+                remove("password")
+                remove("id")
+                remove("type")
+                remove("signedIn")
+                remove("jwt")
+            }
         }
     }
 }
