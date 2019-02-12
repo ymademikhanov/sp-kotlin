@@ -8,11 +8,15 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.android.simplealarmmanagerapp.R
+import com.example.android.simplealarmmanagerapp.adapters.CourseInfoAdapter
 import com.example.android.simplealarmmanagerapp.utilities.constants.AUTH_PREFERENCE_NAME
 import com.example.android.simplealarmmanagerapp.utilities.network.StudentAPI
 import com.example.android.simplealarmmanagerapp.utilities.network.StudentAPIClient
 import com.example.android.simplealarmmanagerapp.models.Section
+import kotlinx.android.synthetic.main.fragment_home.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -22,6 +26,8 @@ class HomeFragment : Fragment() {
 
     val TAG = "HomeFragment"
     lateinit var preferences: SharedPreferences
+    lateinit var courseInfoAdapter: CourseInfoAdapter
+    var sections = ArrayList<Section>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -33,7 +39,15 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         preferences = context!!.getSharedPreferences(AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE)
 
+        initUI()
+
         loadSectionsWithAttendances()
+    }
+
+    private fun initUI() {
+        courseInfoAdapter = CourseInfoAdapter(sections)
+        courseInfoRV.adapter = courseInfoAdapter
+        courseInfoRV.layoutManager = LinearLayoutManager(context)
     }
 
     private fun loadSectionsWithAttendances() {
@@ -41,16 +55,19 @@ class HomeFragment : Fragment() {
         val jwtMap = mapOf("x-auth" to jwt)
 
         val client = StudentAPIClient.client.create<StudentAPI>(StudentAPI::class.java)
-        val sections = client.listSectionsWithAttendance(jwtMap).enqueue(object : Callback<List<Section>> {
+        val loadSections = client.listSectionsWithAttendance(jwtMap).enqueue(object : Callback<List<Section>> {
             override fun onResponse(call: Call<List<Section>>, response: Response<List<Section>>) {
                 if (response.isSuccessful()) {
                     // tasks available
-                    val sections = response.body()
+                    val tempSections = response.body()
                     Log.i(TAG, "Sections with attendances $sections")
 
-                    for (section in sections!!) {
-                        Log.i(TAG, "passed ${section.passedClasses}, attended ${section.attendedClasses}")
-                    }
+//                    for (section in sections!!) {
+//                        Log.i(TAG, "passed ${section.passedClasses}, attended ${section.attendedClasses}")
+//                    }
+
+                    sections = tempSections as ArrayList<Section>
+                    courseInfoAdapter.notifyDataSetChanged()
                 } else {
                     // error response, no access to resource?
                 }
