@@ -63,18 +63,8 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
         // Initializing UI.
         initUI()
 
-//        testSomeStuff()
-
         // Auto signing-in.
         autoSign()
-    }
-
-    fun testSomeStuff() {
-        val localDao = AttCheckReportDaoLocal(context)
-        attCheckReportRepository = AttCheckReportRepositoryImpl(null, localDao)
-
-        val report = AttendanceCheckReport(10, 234, System.currentTimeMillis(), false, "Rustam is awesome")
-        attCheckReportRepository.report(report)
     }
 
     private fun initUI() {

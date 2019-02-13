@@ -9,9 +9,15 @@ import android.content.*
 import android.util.Log
 import androidx.core.app.JobIntentService
 import com.example.android.simplealarmmanagerapp.R
+import com.example.android.simplealarmmanagerapp.models.AttendanceCheck
+import com.example.android.simplealarmmanagerapp.models.daos.AttCheckReportDaoLocal
+import com.example.android.simplealarmmanagerapp.models.daos.AttCheckReportDaoRemote
 import com.example.android.simplealarmmanagerapp.models.entities.AttendanceCheckReport
+import com.example.android.simplealarmmanagerapp.models.repositories.AttCheckReportRepository
+import com.example.android.simplealarmmanagerapp.models.repositories.AttCheckReportRepositoryImpl
 import com.example.android.simplealarmmanagerapp.utilities.constants.BAC_PREFERENCES_NAME
 import com.example.android.simplealarmmanagerapp.utilities.constants.TARGET_BEACON_ADDRESS_CONST
+import com.example.android.simplealarmmanagerapp.utilities.network.StudentAPIClient
 import kotlin.concurrent.thread
 
 class AttendanceCheckJobService: JobIntentService() {
@@ -19,6 +25,7 @@ class AttendanceCheckJobService: JobIntentService() {
     val TAG = "AttCheckJobService"
 
     val ATTENDANCE_CHECK_DURATION_MILLIS: Long = 20000
+    lateinit var attCheckReportRepository: AttCheckReportRepository
 
     lateinit var preferences: SharedPreferences
     lateinit var targetAddress : String
@@ -104,14 +111,16 @@ class AttendanceCheckJobService: JobIntentService() {
                     if (current == target) {
                         val timestamp = System.currentTimeMillis()
 
-                        // Reporting locally.
-                        val report = AttendanceCheckReport(
-                                attendanceCheckID = attendanceCheckId,
-                                timestamp = timestamp,
-                                reported = false,
-                                foundDevice = deviceHardwareAddress)
+                        // Reporting successful check.
+                        val jwt = preferences.getString("jwt", "")
+                        val jwtMap = mapOf("x-auth" to jwt)
 
-                        AttendanceCheckReporter.report(applicationContext, report)
+                        val localDao = AttCheckReportDaoLocal(applicationContext)
+                        val remoteDao = AttCheckReportDaoRemote(jwtMap, StudentAPIClient.client)
+
+                        attCheckReportRepository = AttCheckReportRepositoryImpl(remoteDao, localDao)
+                        val check = AttendanceCheck(attendanceCheckId, attendanceId, timestamp, true)
+                        attCheckReportRepository.report(check)
 
 //                        AttendanceReporter().execute(attendanceId)
                         createNotification(context, deviceName, deviceHardwareAddress)

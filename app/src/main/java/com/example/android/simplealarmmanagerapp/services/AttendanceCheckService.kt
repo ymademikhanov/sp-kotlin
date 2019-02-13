@@ -119,7 +119,7 @@ class AttendanceCheckService : Service() {
 
                         // Reporting locally.
                         val report = AttendanceCheckReport(10, attendanceCheckId, timestamp, false, deviceHardwareAddress)
-                        attCheckReportRepository.report(report)
+//                        attCheckReportRepository.report(report)
 
 //                        AttendanceCheckReporter.report(applicationContext, report)
 //                        AttendanceReporter().execute(attendanceId)

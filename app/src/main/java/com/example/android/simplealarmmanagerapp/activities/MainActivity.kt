@@ -1,5 +1,7 @@
 package com.example.android.simplealarmmanagerapp.activities
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -9,14 +11,20 @@ import androidx.navigation.Navigation
 import com.example.android.simplealarmmanagerapp.R
 import kotlinx.android.synthetic.main.activity_main.*
 import androidx.navigation.ui.NavigationUI
+import com.example.android.simplealarmmanagerapp.models.AttendanceCheck
 import com.example.android.simplealarmmanagerapp.models.daos.AttCheckReportDaoLocal
+import com.example.android.simplealarmmanagerapp.models.daos.AttCheckReportDaoRemote
 import com.example.android.simplealarmmanagerapp.models.entities.AttendanceCheckReport
 import com.example.android.simplealarmmanagerapp.models.repositories.AttCheckReportRepository
 import com.example.android.simplealarmmanagerapp.models.repositories.AttCheckReportRepositoryImpl
+import com.example.android.simplealarmmanagerapp.utilities.constants.AUTH_PREFERENCE_NAME
+import com.example.android.simplealarmmanagerapp.utilities.network.StudentAPIClient
 
 class MainActivity : AppCompatActivity(){
 
     lateinit var attCheckReportRepository: AttCheckReportRepository
+    lateinit var preferences: SharedPreferences
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +32,8 @@ class MainActivity : AppCompatActivity(){
         setSupportActionBar(toolbar)
 
         val navController = Navigation.findNavController(this, R.id.my_nav_host_fragment)
+
+        preferences = this.getSharedPreferences(AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE)
 
         setupBottomNavMenu(navController)
         setupSideNavigationMenu(navController)
@@ -35,11 +45,17 @@ class MainActivity : AppCompatActivity(){
 
 
     fun testSomeStuff() {
-        val localDao = AttCheckReportDaoLocal(this)
-        attCheckReportRepository = AttCheckReportRepositoryImpl(null, localDao)
 
-        val report = AttendanceCheckReport(10, 234, System.currentTimeMillis(), false, "Rustam is awesome")
-        attCheckReportRepository.report(report)
+        val jwt = preferences.getString("jwt", "")
+        val jwtMap = mapOf("x-auth" to jwt)
+
+        val localDao = AttCheckReportDaoLocal(this)
+        val remoteDao = AttCheckReportDaoRemote(jwtMap, StudentAPIClient.client)
+
+        attCheckReportRepository = AttCheckReportRepositoryImpl(remoteDao, localDao)
+
+        val check = AttendanceCheck(668, 86, 342423, true)
+        attCheckReportRepository.report(check)
     }
 
     private fun setupBottomNavMenu(navController: NavController) {

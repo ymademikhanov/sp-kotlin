@@ -1,7 +1,7 @@
 package com.example.android.simplealarmmanagerapp.models.repositories
 
-import com.example.android.simplealarmmanagerapp.models.entities.AttendanceCheckReport
+import com.example.android.simplealarmmanagerapp.models.AttendanceCheck
 
 interface AttCheckReportRepository {
-    fun report(report: AttendanceCheckReport)
+    fun report(report: AttendanceCheck)
 }

@@ -1,30 +1,43 @@
 package com.example.android.simplealarmmanagerapp.models
 
+import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-class Section(var id: Int? = null,
+class Section(
+        @Expose
+        var id: Int? = null,
 
-              var courseId: Int? = null,
+        @Expose
+        var courseId: Int? = null,
 
-              var code: String? = null,
+        @Expose
+        var code: String? = null,
 
-              var checksTotalDefault: Int? = null,
+        @Expose
+        var checksTotalDefault: Int? = null,
 
-              var roomId: Int? = null,
+        @Expose
+        var roomId: Int? = null,
 
-              @SerializedName("passed_classes")
-              val passedClasses: Int? = null,
+        @Expose
+        @SerializedName("passed_classes")
+        val passedClasses: Int? = null,
 
-              @SerializedName("attended_classes")
-              val attendedClasses: Int? = null,
+        @Expose
+        @SerializedName("attended_classes")
+        val attendedClasses: Int? = null,
 
-              var course: Course? = null,
+        @Expose
+        var course: Course? = null,
 
-              var room: String? = null,
+        @Expose
+        var room: String? = null,
 
-              var sectionSlots: List<SectionSlot>? = null,
+        @Expose
+        var sectionSlots: List<SectionSlot>? = null,
 
-              var classes: List<Class>? = null
+        @Expose
+        var classes: List<Class>? = null
 ) {
     override fun toString(): String {
         return "Section { course id: ${course?.id}, " +

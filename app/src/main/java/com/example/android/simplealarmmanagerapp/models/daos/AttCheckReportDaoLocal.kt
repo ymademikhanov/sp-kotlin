@@ -2,6 +2,7 @@ package com.example.android.simplealarmmanagerapp.models.daos
 
 import android.content.Context
 import android.util.Log
+import com.example.android.simplealarmmanagerapp.models.AttendanceCheck
 import com.example.android.simplealarmmanagerapp.models.entities.AttendanceCheckReport
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -11,12 +12,24 @@ class AttCheckReportDaoLocal(val context: Context): AttCheckReportDao {
     val TAG = "AttendanceCheckReporter"
     var db: AppDatabase? = null
     var reportDao: AttendanceCheckReportDao? = null
+    lateinit var mSubscriber: AttCheckDaoSubscriber
 
-    override fun report(report: AttendanceCheckReport) {
+    override fun setSubscriber(subscriber: AttCheckDaoSubscriber) {
+        mSubscriber = subscriber
+    }
+
+    override fun report(check: AttendanceCheck) {
         Observable.fromCallable {
             db = AppDatabase.getAppDatabase(context = context)
             reportDao = db?.attendanceCheckReportDao()
             with(reportDao){
+                val report = AttendanceCheckReport(
+                        check.id,
+                        check.attendanceId!!,
+                        check.timestamp,
+                        false,
+                        "default")
+
                 this?.insert(report)
             }
         }.subscribeOn(Schedulers.io())
@@ -34,5 +47,6 @@ class AttCheckReportDaoLocal(val context: Context): AttCheckReportDao {
         }.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe()
+
     }
 }

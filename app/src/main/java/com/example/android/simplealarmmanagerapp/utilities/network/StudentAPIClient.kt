@@ -1,5 +1,8 @@
 package com.example.android.simplealarmmanagerapp.utilities.network
 
+import com.google.gson.ExclusionStrategy
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -11,11 +14,11 @@ class StudentAPIClient {
 
         val client: Retrofit
             get() {
-
                 if (retrofit == null) {
+                    val gson = GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()
                     retrofit = Retrofit.Builder()
                             .baseUrl(baseURL)
-                            .addConverterFactory(GsonConverterFactory.create())
+                            .addConverterFactory(GsonConverterFactory.create(gson))
                             .build()
                 }
                 return retrofit!!
