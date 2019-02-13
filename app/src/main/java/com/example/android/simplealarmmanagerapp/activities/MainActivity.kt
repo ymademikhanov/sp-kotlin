@@ -9,8 +9,14 @@ import androidx.navigation.Navigation
 import com.example.android.simplealarmmanagerapp.R
 import kotlinx.android.synthetic.main.activity_main.*
 import androidx.navigation.ui.NavigationUI
+import com.example.android.simplealarmmanagerapp.models.daos.AttCheckReportDaoLocal
+import com.example.android.simplealarmmanagerapp.models.entities.AttendanceCheckReport
+import com.example.android.simplealarmmanagerapp.models.repositories.AttCheckReportRepository
+import com.example.android.simplealarmmanagerapp.models.repositories.AttCheckReportRepositoryImpl
 
 class MainActivity : AppCompatActivity(){
+
+    lateinit var attCheckReportRepository: AttCheckReportRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,6 +28,18 @@ class MainActivity : AppCompatActivity(){
         setupBottomNavMenu(navController)
         setupSideNavigationMenu(navController)
         setupActionBar(navController)
+
+
+        testSomeStuff()
+    }
+
+
+    fun testSomeStuff() {
+        val localDao = AttCheckReportDaoLocal(this)
+        attCheckReportRepository = AttCheckReportRepositoryImpl(null, localDao)
+
+        val report = AttendanceCheckReport(10, 234, System.currentTimeMillis(), false, "Rustam is awesome")
+        attCheckReportRepository.report(report)
     }
 
     private fun setupBottomNavMenu(navController: NavController) {

@@ -10,8 +10,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.android.simplealarmmanagerapp.R
 import com.example.android.simplealarmmanagerapp.models.Account
 import com.example.android.simplealarmmanagerapp.models.daos.AppDatabase
+import com.example.android.simplealarmmanagerapp.models.daos.AttCheckReportDaoLocal
 import com.example.android.simplealarmmanagerapp.models.daos.AttendanceCheckReportDao
 import com.example.android.simplealarmmanagerapp.models.entities.AttendanceCheckReport
+import com.example.android.simplealarmmanagerapp.models.repositories.AttCheckReportRepository
+import com.example.android.simplealarmmanagerapp.models.repositories.AttCheckReportRepositoryImpl
 import com.example.android.simplealarmmanagerapp.utilities.LocalAccountManager
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.AuthSubscriber
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.SignInPerformer
@@ -40,6 +43,8 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
     private var db: AppDatabase? = null
     private var reportDao: AttendanceCheckReportDao? = null
 
+    lateinit var attCheckReportRepository: AttCheckReportRepository
+
     private enum class Tag {
         Email,
         Password,
@@ -58,25 +63,18 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
         // Initializing UI.
         initUI()
 
-        testSomeStuff()
+//        testSomeStuff()
 
         // Auto signing-in.
         autoSign()
     }
 
     fun testSomeStuff() {
+        val localDao = AttCheckReportDaoLocal(context)
+        attCheckReportRepository = AttCheckReportRepositoryImpl(null, localDao)
 
-        Observable.fromCallable {
-            db = AppDatabase.getAppDatabase(context = this)
-            reportDao = db?.attendanceCheckReportDao()
-            this.db?.attendanceCheckReportDao()?.getAll()
-        }.doOnNext { list ->
-            var finalString = ""
-            list?.map { finalString+= "id: " + it.id.toString() + " - " + it.attendanceCheckID.toString() + " - " + it.timestamp.toString() + " - " + it.foundDevice + "\n"}
-            Log.i(TAG, "All attendance check reports: \n $finalString")
-        }.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe()
+        val report = AttendanceCheckReport(10, 234, System.currentTimeMillis(), false, "Rustam is awesome")
+        attCheckReportRepository.report(report)
     }
 
     private fun initUI() {
@@ -164,7 +162,7 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
                 finishLoadingIGB()
                 ProgressLoadingIGB.startLoadingIGB(context) {
                     message = pair.first.message!!
-                    srcLottieJson = R.raw.loading_error
+                    srcLottieJson = R.raw.error_animation
                     timer = 2000
                 }
             }

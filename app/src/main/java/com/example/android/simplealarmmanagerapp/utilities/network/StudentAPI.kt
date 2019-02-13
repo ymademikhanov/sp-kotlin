@@ -5,9 +5,7 @@ import com.example.android.simplealarmmanagerapp.models.AttendanceCheck
 import com.example.android.simplealarmmanagerapp.models.Class
 import com.example.android.simplealarmmanagerapp.models.Section
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.HeaderMap
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface StudentAPI {
     @GET("me/sections")
@@ -27,4 +25,7 @@ interface StudentAPI {
     @GET("attendances/{attendanceID}/checks")
     fun listChecks(@HeaderMap headers: Map<String, String>,
                             @Path("attendanceID") sectionID: Int): Call<List<AttendanceCheck>>
+
+    @PATCH("attendances/checks/{id}")
+    fun reportAttendanceCheck(@HeaderMap headers: Map<String, String>, @Path("id") id: Int)
 }

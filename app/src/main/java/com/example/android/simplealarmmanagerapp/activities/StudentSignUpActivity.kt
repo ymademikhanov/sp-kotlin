@@ -3,16 +3,13 @@ package com.example.android.simplealarmmanagerapp.activities
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.android.simplealarmmanagerapp.R
 import com.example.android.simplealarmmanagerapp.models.Account
 import com.example.android.simplealarmmanagerapp.models.Student
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.AuthSubscriber
-import com.example.android.simplealarmmanagerapp.utilities.auth_network.SignInPerformer
 import com.example.android.simplealarmmanagerapp.utilities.auth_network.SignUpPerformer
 import com.example.android.simplealarmmanagerapp.utilities.constants.*
 import com.example.android.simplealarmmanagerapp.utilities.network.Resource
@@ -23,7 +20,6 @@ import com.thejuki.kformmaster.model.FormEmailEditTextElement
 import com.thejuki.kformmaster.model.FormNumberEditTextElement
 import com.thejuki.kformmaster.model.FormPasswordEditTextElement
 import com.thejuki.kformmaster.model.FormSingleLineEditTextElement
-import com.thejuki.kformmaster.state.FormEditTextViewState
 import kotlinx.android.synthetic.main.activity_sign_up_student.*
 
 class StudentSignUpActivity : AppCompatActivity(), AuthSubscriber {
@@ -150,7 +146,7 @@ class StudentSignUpActivity : AppCompatActivity(), AuthSubscriber {
                 finishLoadingIGB()
                 ProgressLoadingIGB.startLoadingIGB(context) {
                     message = pair.first.message!!
-                    srcLottieJson = R.raw.loading_error
+                    srcLottieJson = R.raw.error_animation
                     timer = 2000
                 }
             }

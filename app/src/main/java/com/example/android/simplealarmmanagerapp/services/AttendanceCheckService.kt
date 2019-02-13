@@ -11,7 +11,10 @@ import android.os.AsyncTask
 import android.os.IBinder
 import android.util.Log
 import com.example.android.simplealarmmanagerapp.R
+import com.example.android.simplealarmmanagerapp.models.daos.AttCheckReportDaoLocal
 import com.example.android.simplealarmmanagerapp.models.entities.AttendanceCheckReport
+import com.example.android.simplealarmmanagerapp.models.repositories.AttCheckReportRepository
+import com.example.android.simplealarmmanagerapp.models.repositories.AttCheckReportRepositoryImpl
 import com.example.android.simplealarmmanagerapp.utilities.constants.BAC_PREFERENCES_NAME
 import com.example.android.simplealarmmanagerapp.utilities.constants.ATTENDANCE_URL
 import com.example.android.simplealarmmanagerapp.utilities.constants.TARGET_BEACON_ADDRESS_CONST
@@ -32,10 +35,16 @@ class AttendanceCheckService : Service() {
     var attendanceId : Int = 0
     var attendanceCheckId : Int = 0
 
+    lateinit var attCheckReportRepository: AttCheckReportRepository
+
     override fun onCreate() {
         Log.i(TAG, "onCreate()")
         preferences =
                 applicationContext.getSharedPreferences(BAC_PREFERENCES_NAME, Context.MODE_PRIVATE)
+
+        val localDao = AttCheckReportDaoLocal(applicationContext)
+        attCheckReportRepository = AttCheckReportRepositoryImpl(null, localDao)
+
         super.onCreate()
     }
 
@@ -110,9 +119,13 @@ class AttendanceCheckService : Service() {
 
                         // Reporting locally.
                         val report = AttendanceCheckReport(10, attendanceCheckId, timestamp, false, deviceHardwareAddress)
-                        AttendanceCheckReporter.report(applicationContext, report)
+                        attCheckReportRepository.report(report)
 
-                        AttendanceReporter().execute(attendanceId)
+//                        AttendanceCheckReporter.report(applicationContext, report)
+//                        AttendanceReporter().execute(attendanceId)
+
+
+
                         createNotification(context, deviceName, deviceHardwareAddress)
                         stopDiscoverAndDisableBluetooth()
                     }

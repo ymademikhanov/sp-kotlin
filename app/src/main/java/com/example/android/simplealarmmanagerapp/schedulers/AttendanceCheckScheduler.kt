@@ -31,6 +31,8 @@ class AttendanceCheckScheduler {
                         PendingIntent.FLAG_CANCEL_CURRENT
                 )
 
+                Log.i(TAG, "attCheck $check")
+
                 alarmManager.setExact(AlarmManager.RTC, check.timestamp, pendingIntent)
                 Log.i(TAG, "Scheduled Alarm at ${getDateTime(check.timestamp)}")
             }
