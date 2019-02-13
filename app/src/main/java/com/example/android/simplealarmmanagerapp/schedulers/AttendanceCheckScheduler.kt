@@ -18,6 +18,9 @@ class AttendanceCheckScheduler {
                      checks: ArrayList<AttendanceCheck>) {
             // CREATING ALARM MANAGER SCHEDULES FOR ATTENDANCE CHECKS.
             for (check in checks) {
+                if (check.timestamp < System.currentTimeMillis())
+                    continue
+
                 val intent = Intent(mContext, BeaconScanner::class.java)
                 intent.putExtra("attendanceId", check.attendanceId)
                 intent.putExtra("attendanceCheckId", check.id)

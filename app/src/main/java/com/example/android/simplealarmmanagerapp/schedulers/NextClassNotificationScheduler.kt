@@ -23,9 +23,9 @@ class NextClassNotificationScheduler {
             Log.i(TAG, "Section course title $sectionCourseTitle")
 
             // CREATING ALARM MANAGER SCHEDULES FOR STARTING CLASS NOTIFICATION AND TURNING ON WIFI.
-
-
             for (c in classes) {
+                if (c.start < System.currentTimeMillis())
+                    continue
                 val intent = Intent(mContext, NextClassNotifier::class.java)
                 intent.putExtra("startingClassTitle", sectionCourseTitle)
                 val alarmId = "$CLASS_NOTIFICATION_PREFIX:${c.sectionId}:${c.id}"

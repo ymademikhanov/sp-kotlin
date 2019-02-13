@@ -11,7 +11,7 @@ import khronos.*
 
 class WeeklyCheckLoader {
     companion object {
-        val TAG = "WeeklyCheckLoader"
+        val TAG = "AttAppWeeklyCheckLoader"
         fun schedule(context: Context, account: Account) {
             val alarmManager = context!!.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -20,17 +20,18 @@ class WeeklyCheckLoader {
             if (account.type == "student") {
                 // SETTING REPEATED ATTENDANCE CHECK LOADING ON EVERY SUNDAY.
                 val today = Dates.today
-                var thisSunday = today.with(weekday = 1)
-                thisSunday = thisSunday.beginningOfHour
+//                var thisSunday = today.with(weekday = 1)
+//                thisSunday = thisSunday.beginningOfHour
 
-                thisSunday = today
-                thisSunday += 1.minute
+                var current = System.currentTimeMillis()
+                var thisSunday = today
+                thisSunday += 5.second
 
                 // Starting from past week which means that alarm manager will immediately fire.
 //                thisSunday -= 1.week
 
                 for (i in 0..15) {
-                    if (thisSunday.time > System.currentTimeMillis() - 24 * 60 * 60 * 1000) {
+                    if (thisSunday.time > current) {
                         val intent = Intent(context, WeeklyBTCheckScheduler::class.java)
                         val alarmId = "$WEEKLY_ATTENDANCE_CHECK_LOADER_PREFIX:$account.id:$i"
                         val hashcode = alarmId.hashCode()

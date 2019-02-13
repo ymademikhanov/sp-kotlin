@@ -76,7 +76,7 @@ class AttendanceCheckJobService: JobIntentService() {
         @SuppressLint("PrivateResource")
         fun createNotification(context: Context, deviceName: String, deviceAddress: String) {
             val builder = Notification.Builder(context)
-                    .setContentTitle("Found a target beacon")
+                    .setContentTitle("Found a beacon")
                     .setContentText("Address is $deviceAddress")
                     .setSmallIcon(R.drawable.notification_icon_background)
 
@@ -108,6 +108,8 @@ class AttendanceCheckJobService: JobIntentService() {
                     val target = re.replace("5C-F9-38-93-4E-3F", "")
                     val current = re.replace(deviceHardwareAddress.toUpperCase(), "")
 
+                    createNotification(context, deviceName, deviceHardwareAddress)
+
                     if (current == target) {
                         val timestamp = System.currentTimeMillis()
 
@@ -134,11 +136,12 @@ class AttendanceCheckJobService: JobIntentService() {
     private fun enableBluetoothAndStartDiscovery() {
         Log.i(TAG, "Enabling BT discovery")
         mBluetoothAdapter.enable()
-        var i = 0
-        while (!mBluetoothAdapter.isEnabled) {
-            i += 1
+        if (mBluetoothAdapter.isDiscovering) {
+            // Bluetooth is already in discovery mode, we cancel to restart it again
+            mBluetoothAdapter.cancelDiscovery()
         }
         mBluetoothAdapter.startDiscovery()
+
         Log.i(TAG, "BT discovery started")
 
         val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
@@ -148,7 +151,7 @@ class AttendanceCheckJobService: JobIntentService() {
 
     fun stopDiscoverAndDisableBluetooth() {
         Log.i(TAG, "Disabling BT discovery")
-        while (mBluetoothAdapter.isDiscovering) {
+        if (mBluetoothAdapter.isDiscovering) {
             mBluetoothAdapter.cancelDiscovery()
         }
         Log.i(TAG, "Disabling Bluetooth")

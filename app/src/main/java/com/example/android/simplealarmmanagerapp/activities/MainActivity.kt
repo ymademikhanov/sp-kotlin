@@ -39,8 +39,7 @@ class MainActivity : AppCompatActivity(){
         setupSideNavigationMenu(navController)
         setupActionBar(navController)
 
-
-        testSomeStuff()
+//        testSomeStuff()
     }
 
 

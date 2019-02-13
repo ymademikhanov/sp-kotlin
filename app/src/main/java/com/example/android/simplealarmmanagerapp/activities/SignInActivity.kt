@@ -158,4 +158,9 @@ class SignInActivity : AppCompatActivity(), AuthSubscriber {
             }
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        finishLoadingIGB()
+    }
 }

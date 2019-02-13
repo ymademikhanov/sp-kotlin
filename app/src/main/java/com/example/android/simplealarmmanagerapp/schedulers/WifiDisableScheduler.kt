@@ -17,6 +17,9 @@ class WifiDisableScheduler {
                      alarmManager: AlarmManager,
                      classes: ArrayList<Class>) {
             for (c in classes) {
+                if (c.start < System.currentTimeMillis())
+                    continue
+
                 val intent = Intent(mContext, NetworkDisabler::class.java)
                 val alarmId = "$WIFI_DISABLING_SERVICE_PREFIX:${c.sectionId}:${c.id}"
                 val alarmIdHashcode = alarmId.hashCode()

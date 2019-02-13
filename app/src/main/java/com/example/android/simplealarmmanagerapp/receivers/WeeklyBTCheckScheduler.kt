@@ -22,7 +22,7 @@ import com.example.android.simplealarmmanagerapp.schedulers.WifiDisableScheduler
 
 
 class WeeklyBTCheckScheduler : BroadcastReceiver() {
-    val TAG = "WeeklyBTCheckScheduler"
+    val TAG = "AttWeeklyBTCheckSched"
 
     private var classes: ArrayList<Class> = ArrayList()
 
@@ -110,13 +110,13 @@ class WeeklyBTCheckScheduler : BroadcastReceiver() {
             NextClassNotificationScheduler.schedule(mContext, alarmManager, courseTitle, classes)
 
             // Scheduling wifi disabling after a class.
-            WifiDisableScheduler.schedule(mContext, alarmManager, classes)
+//            WifiDisableScheduler.schedule(mContext, alarmManager, classes)
 
             // Scheduling attendance checks for the next week.
             AttendanceCheckScheduler.schedule(mContext, alarmManager, attendanceChecks)
 
             // Disabling Wifi.
-            NetworkManager.disableNetwork(mContext)
+//            NetworkManager.disableNetwork(mContext)
 
             notificationBuilder.setContentText(ATTENDANCE_CHECK_SETUP_END_MESSAGE)
             notificationManager.notify(0, notificationBuilder.build())
